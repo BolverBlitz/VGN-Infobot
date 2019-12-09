@@ -17,7 +17,7 @@ Enter Telegram Bottoken and MySQL Passwort in secret.json
 "database" enter Database Name.
 ```json
 {
-    "botname":"VGN_Infobot",
+	"botname":"VGN_Infobot",
 	"DefaultLanguage":"DE",
 	"DefaultDistance":"500",
 	"DefaultSort":"Distance",
@@ -26,7 +26,7 @@ Enter Telegram Bottoken and MySQL Passwort in secret.json
 	"isSuperAdmin":"206921999",
 	"isSuperAdminUsername":"BolverBlitz",
 	"dbreaduserhost":"localhost",
-    "dbreaduser":"root",
+	"dbreaduser":"root",
 	"database":"VAGInfo",
 	"WTdelmsgshort":"5400",
 	"WTdelmsglong":"15400"
@@ -61,7 +61,7 @@ VAG.Haltestellen(Name).then(
 
 Returns a Promise Object containing
 ```js
-{ Haltestellenname: 'Opernhaus ',
+{   Haltestellenname: 'Opernhaus ',
     VAGKennung: 'OP,OPERNH',
     VGNKennung: 505,
     Longitude: 11.0756094680969,
