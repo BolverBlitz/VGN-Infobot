@@ -1,0 +1,15 @@
+{
+	"botname":"VGN_Infobot",
+	"DefaultLanguage":"DE",
+	"DefaultDistance":"500",
+	"DefaultSort":"Distance",
+	"botversion":"0.1",
+	"LogChat":"-1001211106939",
+	"isSuperAdmin":"206921999",
+	"isSuperAdminUsername":"BolverBlitz",
+	"dbreaduserhost":"example.com",
+	"dbreaduser":"root",
+	"database":"VAGInfo",
+	"WTdelmsgshort":"5400",
+	"WTdelmsglong":"15400"
+}

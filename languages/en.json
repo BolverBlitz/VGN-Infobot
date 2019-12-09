@@ -1,0 +1,4 @@
+{
+    "Version": "This bot is running on version {{version}}",
+	"botinfo": "Botname: {{botname}} \nVersion: {{version}} \n\nLast changes: ({{version}}){{changelog_latest}}"
+}

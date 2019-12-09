@@ -1,0 +1,21 @@
+{
+  "name": "VAGInfoBot",
+  "version": "1.0.0",
+  "description": "Telegrambot to read and analyze data provided from \"TP Link\" wall plugs",
+  "main": "VAGInfoBot.js",
+  "dependencies": {
+    "csv": "^5.1.1",
+    "geolib": "^3.0.4",
+    "hash-int": "^1.0.0",
+    "mysql": "^2.16.0",
+    "new-i18n": "^1.2.0",
+    "request": "^2.88.0",
+    "systeminformation": "^4.15.3",
+    "telebot": "^1.2.6"
+  },
+  "scripts": {
+    "start": "node VAGInfoBot.js"
+  },
+  "author": "BolverBlitz",
+  "license": "MIT"
+}
