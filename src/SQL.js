@@ -13,8 +13,7 @@ var db = mysql.createPool({
 });
 
 module.exports = {
-	requestData: function requestData(userID, callback) {
-		console.log(secret.dbreaduserpwd)
+	requestData: function requestData(userID, callback) { 
 	db.getConnection(function(err, connection){
 		connection.query('SELECT * FROM users where userhash =' + hash(userID) + ';', function(err, rows, fields) {
 			//console.log(rows);

@@ -138,7 +138,7 @@ bot.on(/^\/haltestellen( .+)*$/i, (msg, props) => {
 							//console.log(Haltestellen);
 							for(var i in Haltestellen){
 								let i1 = +i +1;
-								var Message = i1 + "(" + Nummer +") `" + Haltestellen[i].Haltestellenname + "`\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + Haltestellen[i].Produkte + "\n\n";
+								var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "`\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + Haltestellen[i].Produkte + "\n\n";
 							}
 							bot.sendMessage(msg.chat.id, Message, { parseMode: 'markdown', webPreview: false });
 						};

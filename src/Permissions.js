@@ -30,7 +30,7 @@ module.exports = {
 		let sqlcmdadduser = "REPLACE INTO users (userhash, userid, username, language, distance, sort, permissions, blocked) VALUES ?";
 		let sqlcmdadduserv = [[hash(user.id), 0, user.name, config.DefaultLanguage, config.DefaultDistance, config.DefaultSort, 1, 0]];
 		connection.query(sqlcmdadduser, [sqlcmdadduserv], function(err, result) {
-			console.log(result);
+			//console.log(result);
 			callback(result);
 			});
 		});
