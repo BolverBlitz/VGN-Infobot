@@ -63,7 +63,7 @@ OS.Hardware.then(function(Hardware) {
 	let Output = "Bot started on Version " + version;
 	Output = Output + '\n- CPU: ' + Hardware.cpubrand + ' ' + Hardware.cpucores + 'x' + Hardware.cpuspeed + ' Ghz';
 	Output = Output + '\n- Load: ' + f.Round2Dec(Hardware.load);
-	Output = Output + '\%n- Memory Total: ' + f.Round2Dec(Hardware.memorytotal/1073741824) + ' GB'
+	Output = Output + '%\n- Memory Total: ' + f.Round2Dec(Hardware.memorytotal/1073741824) + ' GB'
 	Output = Output + '\n- Memory Free: ' + f.Round2Dec(Hardware.memoryfree/1073741824) + ' GB'
 	bot.sendMessage(config.LogChat, Output)
 	//console.log(Hardware);
@@ -131,7 +131,7 @@ bot.on(/^\/haltestellen( .+)*$/i, (msg, props) => {
 				if(Permissions >= permsJson.regUser){
 					//console.log(Permissions);
 					vag.Haltestellen(Para).then(function(Haltestellen) {
-						var Message = "";
+						var Message = "Station that contain '" + Para + "':\n\n";
 						if(Object.entries(Haltestellen).length === 0){
 							msg.reply.text("I´m sorry, i couldn´t find any stations that contain: " + Para + ".");
 						}else{
@@ -152,34 +152,38 @@ bot.on(/^\/haltestellen( .+)*$/i, (msg, props) => {
 
 bot.on('location', (location) => {
 	var LastConnectionLost = new Date();
+		perms.permissions(location.from.id, function(Permissions) {
+		if(Permissions >= permsJson.regUser){
 			//console.log(location.from.id)
-	SQL.requestData(location.from.id, function(rows) {
-		var Data = {
-		lat: location.location.latitude,
-		lon: location.location.longitude,
-		distance: rows.distance, //Get From DB for User
-		sort: rows.sort, //or Alphabetically
-		mode: 'count', //Static used to auto call Abfarten for eatch element. Currently not implemented
-		para: 3, //Get From DB for USER used to auto call Abfarten for eatch element. Currently not implemented
-		};
-		console.log(rows);
-		vag.OnLocation(Data).then(function(Haltestellen) {
-			var Message = "";
-			if(Object.entries(Haltestellen).length === 0){
-				bot.sendMessage(location.from.id, "I´m sorry, i couldn´t find any stations in your area.\nDistance: " + Data.distance);
-			}else{
-				for(let i in Haltestellen){
-					let i1 = +i +1;
-					var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "` (" + Haltestellen[i].Distance + "m)" + "\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + Haltestellen[i].Produkte + "\n\n";
+			SQL.requestData(location.from.id, function(rows) {
+				var Data = {
+					lat: location.location.latitude,
+					lon: location.location.longitude,
+					distance: rows.distance, //Get From DB for User
+					sort: rows.sort, //or Alphabetically
+					mode: 'count', //Static used to auto call Abfarten for eatch element. Currently not implemented
+					para: 3, //Get From DB for USER used to auto call Abfarten for eatch element. Currently not implemented
 				};
+				//console.log(rows);
+				vag.OnLocation(Data).then(function(Haltestellen) {
+					var Message = "Stations in radius " + rows.distance + "m :\n\n";
+					if(Object.entries(Haltestellen).length === 0){
+						bot.sendMessage(location.from.id, "I´m sorry, i couldn´t find any stations in your area.\nDistance: " + Data.distance);
+					}else{
+						for(let i in Haltestellen){
+							let i1 = +i +1;
+							var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "` (" + Haltestellen[i].Distance + "m)" + "\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + Haltestellen[i].Produkte + "\n\n";
+						};
 				
-			}
-			//console.log(Message);
-			bot.sendMessage(location.from.id, Message, { parseMode: 'markdown', webPreview: false });
-		});
-
+					}
+					//console.log(Message);
+					bot.sendMessage(location.from.id, Message, { parseMode: 'markdown', webPreview: false });
+				});
+			});
+		}else{
+			msg.reply.text("I´m sorry, i´m not allowed to awnser you");
+		}
 	});
-
 });
 
 //UserManagment
@@ -218,6 +222,9 @@ bot.on(/^\/unregister/i, (msg) => {
 	});
 });
 
+//Callback Handling
+
+//Funktions
 
 /*function test(){
 var Data = {

@@ -12,9 +12,9 @@ Enter Telegram Bottoken and MySQL Passwort in secret.json
 }
 ```
 
-"dbreaduserhost" is the IP of the MySQLServer, you can use localhost if it runs localy.
-"dbreaduser" enter MySQL User that has accses to create and modyfiy a DB.
-"database" enter Database Name.
+`dbreaduserhost` is the IP of the MySQLServer, you can use localhost if it runs localy.
+`dbreaduser` enter MySQL User that has accses to create and modyfiy a DB.
+`database` enter Database Name.
 ```json
 {
 	"botname":"VGN_Infobot",
