@@ -1,4 +1,5 @@
 const VAGDE = 'https://start.vag.de/dm/api';
+//const VAGDE = 'http://hdjruifjdjrifjfj.de/'; //Error Testing URL
 //Include needed jsons
 //var config = require('./config');
 //var changelog = require('./changelog');
@@ -55,26 +56,26 @@ let OnLocation = function(data) {
 	return new Promise(function(resolve, reject) {
 	var url = VAGDE + '/haltestellen.json/vgn?lon=' + data.lon + '&lat=' + data.lat + '&Distance=' + data.distance;
 	request(url, { json: true }, (err, res, body) => {
+		//console.log(body)
 		if (err) { 
 		//return console.log(err);
 		resolve(err.code);		
 		return err; 
 		//reject(err);
 		}
-		//if ()
-		for(let i in body.Haltestellen){
-			body.Haltestellen[i].Distance = geolib.getDistance(
-				{ latitude: data.lat, longitude: data.lon },
-				{ latitude: body.Haltestellen[i].Latitude, longitude: body.Haltestellen[i].Longitude }
-			);
-			let HaltestellennameSplit = body.Haltestellen[i].Haltestellenname.split("(");
-			let Name = HaltestellennameSplit[0];
-			body.Haltestellen[i].Haltestellenname = Name.trim();
-			let Ort = HaltestellennameSplit[1].replace(/[)]/g,'',);
-			body.Haltestellen[i].Ort = Ort;
-			body.Haltestellen[i].Produkte = body.Haltestellen[i].Produkte.replace(/ubahn/i,'U-Bahn',);
-			body.Haltestellen[i].Produkte = body.Haltestellen[i].Produkte.replace(/,/g,', ',);
-		}
+			for(let i in body.Haltestellen){
+				body.Haltestellen[i].Distance = geolib.getDistance(
+					{ latitude: data.lat, longitude: data.lon },
+					{ latitude: body.Haltestellen[i].Latitude, longitude: body.Haltestellen[i].Longitude }
+				);
+				let HaltestellennameSplit = body.Haltestellen[i].Haltestellenname.split("(");
+				let Name = HaltestellennameSplit[0];
+				body.Haltestellen[i].Haltestellenname = Name.trim();
+				let Ort = HaltestellennameSplit[1].replace(/[)]/g,'',);
+				body.Haltestellen[i].Ort = Ort;
+				body.Haltestellen[i].Produkte = body.Haltestellen[i].Produkte.replace(/ubahn/i,'U-Bahn',);
+				body.Haltestellen[i].Produkte = body.Haltestellen[i].Produkte.replace(/,/g,', ',);
+			}
 		if(data.sort === 'Distance'){body.Haltestellen.sort((a, b) => (a.Distance > b.Distance) ? 1 : -1)};
 		if(data.sort === 'Alphabetically'){body.Haltestellen.sort((a, b) => (a.Haltestellenname > b.Haltestellenname) ? 1 : -1)};
 	//resolve(Test)

@@ -131,17 +131,22 @@ bot.on(/^\/haltestellen( .+)*$/i, (msg, props) => {
 				if(Permissions >= permsJson.regUser){
 					//console.log(Permissions);
 					vag.Haltestellen(Para).then(function(Haltestellen) {
-						var Message = "Station that contain '" + Para + "':\n\n";
-						if(Object.entries(Haltestellen).length === 0){
-							msg.reply.text("I´m sorry, i couldn´t find any stations that contain: " + Para + ".");
+						if(Haltestellen != 'ENOTFOUND' && Haltestellen != 'ECONNREFUSED' && Haltestellen != 'ETIMEDOUT' && Haltestellen != 'ECONNRESET') {
+							var Message = "Stations that contain '" + Para + "':\n\n";
+							if(Object.entries(Haltestellen).length === 0){
+								msg.reply.text("I´m sorry, i couldn´t find any stations that contain: " + Para + ".");
+							}else{
+								//console.log(Haltestellen);
+								for(var i in Haltestellen){
+									let i1 = +i +1;
+									var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "`\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + Haltestellen[i].Produkte + "\n\n";
+								}
+								bot.sendMessage(msg.chat.id, Message, { parseMode: 'markdown', webPreview: false });
+							};
 						}else{
-							//console.log(Haltestellen);
-							for(var i in Haltestellen){
-								let i1 = +i +1;
-								var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "`\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + Haltestellen[i].Produkte + "\n\n";
-							}
-							bot.sendMessage(msg.chat.id, Message, { parseMode: 'markdown', webPreview: false });
-						};
+							bot.sendMessage(location.from.id, 'An Error happend...', { parseMode: 'markdown', webPreview: false });
+							bot.sendMessage(config.LogChat, 'An Error happend.\n' + Haltestellen, { parseMode: 'markdown', webPreview: false });
+						}
 					})
 				}else{
 					msg.reply.text("I´m sorry, i´m not allowed to awnser you");
@@ -166,18 +171,22 @@ bot.on('location', (location) => {
 				};
 				//console.log(rows);
 				vag.OnLocation(Data).then(function(Haltestellen) {
-					var Message = "Stations in radius " + rows.distance + "m :\n\n";
-					if(Object.entries(Haltestellen).length === 0){
-						bot.sendMessage(location.from.id, "I´m sorry, i couldn´t find any stations in your area.\nDistance: " + Data.distance);
-					}else{
-						for(let i in Haltestellen){
-							let i1 = +i +1;
-							var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "` (" + Haltestellen[i].Distance + "m)" + "\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + Haltestellen[i].Produkte + "\n\n";
-						};
-				
-					}
+					if(Haltestellen != 'ENOTFOUND' && Haltestellen != 'ECONNREFUSED' && Haltestellen != 'ETIMEDOUT' && Haltestellen != 'ECONNRESET') {
+						var Message = "Stations in radius " + rows.distance + "m :\n\n";
+						if(Object.entries(Haltestellen).length === 0){
+							bot.sendMessage(location.from.id, "I´m sorry, i couldn´t find any stations in your area.\nDistance: " + Data.distance);
+						}else{
+							for(let i in Haltestellen){
+								let i1 = +i +1;
+								var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "` (" + Haltestellen[i].Distance + "m)" + "\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + Haltestellen[i].Produkte + "\n\n";
+							};
+						}
 					//console.log(Message);
 					bot.sendMessage(location.from.id, Message, { parseMode: 'markdown', webPreview: false });
+					}else{
+						bot.sendMessage(location.from.id, 'An Error happend...', { parseMode: 'markdown', webPreview: false });
+						bot.sendMessage(config.LogChat, 'An Error happend.\n' + Haltestellen, { parseMode: 'markdown', webPreview: false });
+					}
 				});
 			});
 		}else{

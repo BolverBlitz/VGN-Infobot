@@ -109,3 +109,17 @@ This will also give you the same Object like the promise Haltestellen, but with 
     Ort: 'Nürnberg' } ]
 ```
 
+Error handling:
+
+If the API is to slow or not reachable the awnser of the promise will be `ENOTFOUND`, `ECONNREFUSED`, `ETIMEDOUT`, `ECONNRESET`.
+
+```js
+vag.OnLocation(Data).then(function(Haltestellen) {
+	if(Haltestellen != 'ENOTFOUND' && Haltestellen != 'ECONNREFUSED' && Haltestellen != 'ETIMEDOUT' && Haltestellen != 'ECONNRESET') {
+		if no error
+	}else{
+		if error
+	}
+});
+```
+
