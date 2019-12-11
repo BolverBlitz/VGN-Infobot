@@ -32,7 +32,7 @@ var Jahr = Tag*365;
 let Haltestellen = function(Name) {
 	return new Promise(function(resolve, reject) {
 		//https://start.vag.de/dm/api/haltestellen.json/vag?lon=11.06464&lat=49.4484830
-		var url = VAGDE + '/haltestellen.json/vgn?name=' + Name.trim();
+		var url = VAGDE + '/haltestellen.json/vgn?name=' + urlReformat(Name.trim());
 		request(url, { json: true }, (err, res, body) => {
 			if (err) { return console.log(err); }
 			//var Temp = JSON.stringify(body.Haltestellen);
@@ -56,7 +56,6 @@ let OnLocation = function(data) {
 	return new Promise(function(resolve, reject) {
 	var url = VAGDE + '/haltestellen.json/vgn?lon=' + data.lon + '&lat=' + data.lat + '&Distance=' + data.distance;
 	request(url, { json: true }, (err, res, body) => {
-		//console.log(body)
 		if (err) { 
 		//return console.log(err);
 		resolve(err.code);		
@@ -92,6 +91,14 @@ let Abfarten = function(data) {
 }
 
 //exports.Haltestellen = Haltestellen;
+
+function urlReformat(value)
+{
+    value = value.replace(/ä/g, '%C3%A4');
+    value = value.replace(/ö/g, '%C3%B6');
+    value = value.replace(/ü/g, '%C3%BC');
+    return value;
+}
 
 module.exports = {
 	Haltestellen,
