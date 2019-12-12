@@ -155,6 +155,87 @@ bot.on(/^\/haltestellen( .+)*$/i, (msg, props) => {
 		}
 });
 
+bot.on(/^\/abfarten( .+)*$/i, (msg, props) => {
+		var LastConnectionLost = new Date();
+		bot.deleteMessage(msg.chat.id, msg.message_id);
+        var Para = props.match[1]
+		if(typeof(Para) === 'undefined'){
+			msg.reply.text("You didn´t provided me with a name... I can´t send you all of them :P");
+		}else{
+			perms.permissions(msg.from.id, function(Permissions) {
+				if(Permissions >= permsJson.regUser){
+					//console.log(Permissions);
+					vag.Haltestellen(Para).then(function(Haltestellen) {
+						if(Haltestellen != 'ENOTFOUND' && Haltestellen != 'ECONNREFUSED' && Haltestellen != 'ETIMEDOUT' && Haltestellen != 'ECONNRESET') {
+							var data = {
+								limit: 5,
+								vgnkennung: Haltestellen[0].VGNKennung,
+								mode: 'limitcount', //Static used to auto call Abfarten for eatch element. Currently not implemented
+								};
+								var Message = "Next " + data.limit + " departures at station '" + Para + "':\n\n";
+									vag.Abfarten(data).then(function(Abfarten) {
+										//console.log(Abfarten);
+										
+										
+										for(i in Abfarten){
+										console.log(Abfarten[i].AbfahrtszeitSoll)
+										AbfartZeitSollArray = Abfarten[i].AbfahrtszeitSoll;
+										console.log(AbfartZeitSollArray)
+										AbfartZeitSollArray = AbfartZeitSollArray.split('+')
+										console.log(AbfartZeitSollArray)
+										AbfartZeitSollArray = AbfartZeitSollArray[0].split('T');
+										console.log(AbfartZeitSollArray)
+										AbfartZeitSollArrayDatum = AbfartZeitSollArray[0].split('-');
+										console.log(AbfartZeitSollArrayDatum)
+										AbfartZeitSollArrayZeit = AbfartZeitSollArray[1].split(':');
+										console.log(AbfartZeitSollArrayZeit)
+										AbfartZeitSollArrayDatum = AbfartZeitSollArrayDatum[1] + "/" + AbfartZeitSollArrayDatum[2] + "/" + AbfartZeitSollArrayDatum[0]
+										AbfartZeitSollArrayZeitUnix = new Date(AbfartZeitSollArrayDatum).getTime() + AbfartZeitSollArrayZeit[0] * 60 * 60 * 1000 + AbfartZeitSollArrayZeit[1] * 60 * 1000 + AbfartZeitSollArrayZeit[2] * 1000 + 60 * 60 * 1000
+										console.log(AbfartZeitSollArrayZeitUnix)
+										
+										console.log(Abfarten[i].AbfahrtszeitIst)
+										AbfartZeitIstArray = Abfarten[i].AbfahrtszeitIst;
+										console.log(AbfartZeitIstArray)
+										AbfartZeitIstArray = AbfartZeitIstArray.split('+')
+										console.log(AbfartZeitIstArray)
+										AbfartZeitIstArray = AbfartZeitIstArray[0].split('T');
+										console.log(AbfartZeitIstArray)
+										AbfartZeitIstArrayDatum = AbfartZeitIstArray[0].split('-');
+										console.log(AbfartZeitIstArrayDatum)
+										AbfartZeitIstArrayZeit = AbfartZeitIstArray[1].split(':');
+										console.log(AbfartZeitIstArrayZeit)
+										AbfartZeitIstArrayDatum = AbfartZeitIstArrayDatum[1] + "/" + AbfartZeitIstArrayDatum[2] + "/" + AbfartZeitIstArrayDatum[0]
+										AbfartZeitIstArrayZeitUnix = new Date(AbfartZeitIstArrayDatum).getTime() + AbfartZeitIstArrayZeit[0] * 60 * 60 * 1000 + AbfartZeitIstArrayZeit[1] * 60 * 1000 + AbfartZeitIstArrayZeit[2] * 1000 + 60 * 60 * 1000
+										console.log(AbfartZeitIstArrayZeitUnix)
+										
+										Abfarten[i].Verspätung = (AbfartZeitIstArrayZeitUnix - AbfartZeitSollArrayZeitUnix)/1000
+										
+										console.log("Verspätung: " + Abfarten[i].Verspätung)
+										
+											Message = Message + "(" + Abfarten[i].Linienname + ") Direction: " +  Abfarten[i].Richtungstext + "\n Gleis: " + Abfarten[i].Haltepunkt + " Produkt: " + Abfarten[i].Produkt + "\nVerspätung: " + Abfarten[i].Verspätung + "s"
+											if(Abfarten[i].Prognose){
+												Message = Message + " (Echtzeit)\n\n"
+											}else{
+												Message = Message + " (Prognose)\n\n"
+											}
+										}
+										bot.sendMessage(msg.chat.id, Message, { parseMode: 'markdown', webPreview: false });
+										
+									});
+						}else{
+							bot.sendMessage(location.from.id, 'An Error happend...', { parseMode: 'markdown', webPreview: false });
+							bot.sendMessage(config.LogChat, 'An Error happend.\n' + Haltestellen, { parseMode: 'markdown', webPreview: false });
+						}
+					})
+				}else{
+					msg.reply.text("I´m sorry, i´m not allowed to awnser you");
+				}
+			});
+		}
+});
+
+
+
 bot.on('location', (location) => {
 	var LastConnectionLost = new Date();
 		perms.permissions(location.from.id, function(Permissions) {

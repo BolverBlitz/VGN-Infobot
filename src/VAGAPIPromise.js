@@ -86,7 +86,21 @@ let OnLocation = function(data) {
 
 let Abfarten = function(data) {
 	return new Promise(function(resolve, reject) {
-		
+		if(data.mode === 'produkt'){var url = VAGDE + '/abfahrten.json/vgn/' + data.vgnkennung + '?produkt=' + data.produkt + '&LimitCount=' + data.limit}
+		if(data.mode === 'timespan'){var url = VAGDE + '/abfahrten.json/vgn/' + data.vgnkennung + '?TimeSpan=' + data.timespan + '&LimitCount=' + data.limit}
+		if(data.mode === 'timedelay'){var url = VAGDE + '/abfahrten.json/vgn/' + data.vgnkennung + '?TimeDelay=' + data.timedelay + '&LimitCount=' + data.limit}
+		if(data.mode === 'limitcount'){var url = VAGDE + '/abfahrten.json/vgn/' + data.vgnkennung + '?LimitCount=' + data.limit}
+		request(url, { json: true }, (err, res, body) => {
+			if (err) { 
+			//return console.log(err);
+			resolve(err.code);		
+			return err; 
+			//reject(err);
+			}
+			//console.log(body)
+			resolve(body.Abfahrten);
+		});
+		//https://start.vag.de/dm/api/abfahrten.json/vgn/1664?timedelay=60&LimitCount=2
 	});
 }
 
@@ -102,5 +116,6 @@ function urlReformat(value)
 
 module.exports = {
 	Haltestellen,
-	OnLocation
+	OnLocation,
+	Abfarten
 };
