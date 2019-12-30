@@ -3,6 +3,8 @@
 	"DefaultLanguage":"DE",
 	"DefaultDistance":"500",
 	"DefaultSort":"Distance",
+	"DefaultListlenth":"3",
+	"DefaultListmode":"list",
 	"botversion":"0.1",
 	"LogChat":"-1001211106939",
 	"isSuperAdmin":"206921999",

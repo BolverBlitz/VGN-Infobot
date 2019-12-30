@@ -62,19 +62,20 @@ let OnLocation = function(data) {
 		return err; 
 		//reject(err);
 		}
-			for(let i in body.Haltestellen){
-				body.Haltestellen[i].Distance = geolib.getDistance(
+			body.Haltestellen.map((Haltestellen) => {
+			//for(let i in body.Haltestellen){
+				Haltestellen.Distance = geolib.getDistance(
 					{ latitude: data.lat, longitude: data.lon },
-					{ latitude: body.Haltestellen[i].Latitude, longitude: body.Haltestellen[i].Longitude }
+					{ latitude: Haltestellen.Latitude, longitude: Haltestellen.Longitude }
 				);
-				let HaltestellennameSplit = body.Haltestellen[i].Haltestellenname.split("(");
+				let HaltestellennameSplit = Haltestellen.Haltestellenname.split("(");
 				let Name = HaltestellennameSplit[0];
-				body.Haltestellen[i].Haltestellenname = Name.trim();
+				Haltestellen.Haltestellenname = Name.trim();
 				let Ort = HaltestellennameSplit[1].replace(/[)]/g,'',);
-				body.Haltestellen[i].Ort = Ort;
-				body.Haltestellen[i].Produkte = body.Haltestellen[i].Produkte.replace(/ubahn/i,'U-Bahn',);
-				body.Haltestellen[i].Produkte = body.Haltestellen[i].Produkte.replace(/,/g,', ',);
-			}
+				Haltestellen.Ort = Ort;
+				Haltestellen.Produkte = Haltestellen.Produkte.replace(/ubahn/i,'U-Bahn',);
+				Haltestellen.Produkte = Haltestellen.Produkte.replace(/,/g,', ',);
+			});
 		if(data.sort === 'Distance'){body.Haltestellen.sort((a, b) => (a.Distance > b.Distance) ? 1 : -1)};
 		if(data.sort === 'Alphabetically'){body.Haltestellen.sort((a, b) => (a.Haltestellenname > b.Haltestellenname) ? 1 : -1)};
 	//resolve(Test)
@@ -98,6 +99,26 @@ let Abfarten = function(data) {
 			//reject(err);
 			}
 			//console.log(body)
+			body.Abfahrten.map((Abfahrten) =>{
+				AbfahrtZeitSollArray = Abfahrten.AbfahrtszeitSoll;
+				AbfahrtZeitSollArray = AbfahrtZeitSollArray.split('+');
+				AbfahrtZeitSollArray = AbfahrtZeitSollArray[0].split('T');
+				AbfahrtZeitSollArrayDatum = AbfahrtZeitSollArray[0].split('-');
+				AbfahrtZeitSollArrayZeit = AbfahrtZeitSollArray[1].split(':');
+				AbfahrtZeitSollArrayDatum = AbfahrtZeitSollArrayDatum[1] + "/" + AbfahrtZeitSollArrayDatum[2] + "/" + AbfahrtZeitSollArrayDatum[0]
+				AbfahrtZeitSollArrayZeitUnix = new Date(AbfahrtZeitSollArrayDatum).getTime() + AbfahrtZeitSollArrayZeit[0] * 60 * 60 * 1000 + AbfahrtZeitSollArrayZeit[1] * 60 * 1000 + AbfahrtZeitSollArrayZeit[2] * 1000 + 60 * 60 * 1000
+
+				AbfahrtZeitIstArray = Abfahrten.AbfahrtszeitIst;
+				AbfahrtZeitIstArray = AbfahrtZeitIstArray.split('+');
+				AbfahrtZeitIstArray = AbfahrtZeitIstArray[0].split('T');
+				AbfahrtZeitIstArrayDatum = AbfahrtZeitIstArray[0].split('-');
+				AbfahrtZeitIstArrayZeit = AbfahrtZeitIstArray[1].split(':');
+				AbfahrtZeitIstArrayDatum = AbfahrtZeitIstArrayDatum[1] + "/" + AbfahrtZeitIstArrayDatum[2] + "/" + AbfahrtZeitIstArrayDatum[0]
+				AbfahrtZeitIstArrayZeitUnix = new Date(AbfahrtZeitIstArrayDatum).getTime() + AbfahrtZeitIstArrayZeit[0] * 60 * 60 * 1000 + AbfahrtZeitIstArrayZeit[1] * 60 * 1000 + AbfahrtZeitIstArrayZeit[2] * 1000 + 60 * 60 * 1000
+										
+				Abfahrten.AbfahrtZeitSoll = AbfahrtZeitSollArray[1]
+				Abfahrten.Verspätung = (AbfahrtZeitIstArrayZeitUnix - AbfahrtZeitSollArrayZeitUnix)/1000
+			});
 			resolve(body.Abfahrten);
 		});
 		//https://start.vag.de/dm/api/abfahrten.json/vgn/1664?timedelay=60&LimitCount=2

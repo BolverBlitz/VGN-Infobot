@@ -15,9 +15,9 @@ var db = mysql.createPool({
 });
 //MySQL Syntax
 let sqlcmd = "CREATE DATABASE IF NOT EXISTS " + config.database + ";";
-let sqlcmdtable = "CREATE TABLE IF NOT EXISTS `users` (`userhash` DOUBLE NOT NULL,`userid` DOUBLE NOT NULL, `username` varchar(255), `language` varchar(255), `distance` varchar(255), `sort` varchar(255), `permissions` DOUBLE NOT NULL, `keywords` varchar(255), `blocked` DOUBLE NOT NULL, `time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`userid`,`permissions`));";
-let sqlcmdaddsuperadmin = "REPLACE INTO users (userhash, userid, username, language, distance, sort, permissions, blocked) VALUES ?";
-let sqlcmdaddsuperadminvalues = [[hash(config.isSuperAdmin), config.isSuperAdmin, config.isSuperAdminUsername, config.DefaultLanguage, config.DefaultDistance, config.DefaultSort, perms.Admin, 0]];
+let sqlcmdtable = "CREATE TABLE IF NOT EXISTS `users` (`userhash` DOUBLE NOT NULL,`userid` DOUBLE NOT NULL, `username` varchar(255), `language` varchar(255), `distance` varchar(255), `listlenth` varchar(255), `listmode` varchar(255), `sort` varchar(255), `permissions` DOUBLE NOT NULL, `keywords` varchar(255), `blocked` DOUBLE NOT NULL, `time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`userid`,`permissions`));";
+let sqlcmdaddsuperadmin = "REPLACE INTO users (userhash, userid, username, language, distance,listlenth, listmode, sort, permissions, blocked) VALUES ?";
+let sqlcmdaddsuperadminvalues = [[hash(config.isSuperAdmin), config.isSuperAdmin, config.isSuperAdminUsername, config.DefaultLanguage, config.DefaultDistance, config.DefaultListlenth, config.DefaultListmode, config.DefaultSort, perms.Admin, 0]];
 /*
 Permissions:
 Check ./data/permissionsList.json
@@ -42,7 +42,7 @@ db.getConnection(function(err, connection){
 				connection.query(sqlcmdaddsuperadmin, [sqlcmdaddsuperadminvalues], function(err, result) {
 					if (err) throw err;
 					console.log("User " + config.isSuperAdminUsername + " (" + config.isSuperAdmin + ") has given Admin permissions.");
-					console.log("\nCompleted. You can now start the Bot (VAGInfo.js)");
+					console.log("\nCompleted. You can now start the Bot (npm start)");
 					process.exit(1);
 				});
                 });

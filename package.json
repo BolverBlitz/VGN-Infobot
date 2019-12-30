@@ -14,7 +14,8 @@
     "telebot": "^1.2.6"
   },
   "scripts": {
-    "start": "node VAGInfoBot.js"
+    "start": "node VAGInfoBot.js",
+	"setup":"node setup.js"
   },
   "author": "BolverBlitz",
   "license": "MIT"

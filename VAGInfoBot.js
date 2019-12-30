@@ -141,7 +141,12 @@ bot.on(/^\/haltestellen( .+)*$/i, (msg, props) => {
 									let i1 = +i +1;
 									var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "`\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + Haltestellen[i].Produkte + "\n\n";
 								}
-								bot.sendMessage(msg.chat.id, Message, { parseMode: 'markdown', webPreview: false });
+								if(Message.length >= 4000){
+									var Message = 'There are to many Stations that contain ' + Para + '\nFound: ' + Haltestellen.length + ' Stations'
+									bot.sendMessage(msg.chat.id, Message, { parseMode: 'markdown', webPreview: false });
+								}else{
+									bot.sendMessage(msg.chat.id, Message, { parseMode: 'markdown', webPreview: false });
+								}
 							};
 						}else{
 							bot.sendMessage(location.from.id, 'An Error happend...', { parseMode: 'markdown', webPreview: false });
@@ -172,53 +177,18 @@ bot.on(/^\/abfarten( .+)*$/i, (msg, props) => {
 								vgnkennung: Haltestellen[0].VGNKennung,
 								mode: 'limitcount', //Static used to auto call Abfarten for eatch element. Currently not implemented
 								};
-								var Message = "Next " + data.limit + " departures at station '" + Para + "':\n\n";
-									vag.Abfarten(data).then(function(Abfarten) {
-										//console.log(Abfarten);
-										
-										
-										for(i in Abfarten){
-										console.log(Abfarten[i].AbfahrtszeitSoll)
-										AbfartZeitSollArray = Abfarten[i].AbfahrtszeitSoll;
-										console.log(AbfartZeitSollArray)
-										AbfartZeitSollArray = AbfartZeitSollArray.split('+')
-										console.log(AbfartZeitSollArray)
-										AbfartZeitSollArray = AbfartZeitSollArray[0].split('T');
-										console.log(AbfartZeitSollArray)
-										AbfartZeitSollArrayDatum = AbfartZeitSollArray[0].split('-');
-										console.log(AbfartZeitSollArrayDatum)
-										AbfartZeitSollArrayZeit = AbfartZeitSollArray[1].split(':');
-										console.log(AbfartZeitSollArrayZeit)
-										AbfartZeitSollArrayDatum = AbfartZeitSollArrayDatum[1] + "/" + AbfartZeitSollArrayDatum[2] + "/" + AbfartZeitSollArrayDatum[0]
-										AbfartZeitSollArrayZeitUnix = new Date(AbfartZeitSollArrayDatum).getTime() + AbfartZeitSollArrayZeit[0] * 60 * 60 * 1000 + AbfartZeitSollArrayZeit[1] * 60 * 1000 + AbfartZeitSollArrayZeit[2] * 1000 + 60 * 60 * 1000
-										console.log(AbfartZeitSollArrayZeitUnix)
-										
-										console.log(Abfarten[i].AbfahrtszeitIst)
-										AbfartZeitIstArray = Abfarten[i].AbfahrtszeitIst;
-										console.log(AbfartZeitIstArray)
-										AbfartZeitIstArray = AbfartZeitIstArray.split('+')
-										console.log(AbfartZeitIstArray)
-										AbfartZeitIstArray = AbfartZeitIstArray[0].split('T');
-										console.log(AbfartZeitIstArray)
-										AbfartZeitIstArrayDatum = AbfartZeitIstArray[0].split('-');
-										console.log(AbfartZeitIstArrayDatum)
-										AbfartZeitIstArrayZeit = AbfartZeitIstArray[1].split(':');
-										console.log(AbfartZeitIstArrayZeit)
-										AbfartZeitIstArrayDatum = AbfartZeitIstArrayDatum[1] + "/" + AbfartZeitIstArrayDatum[2] + "/" + AbfartZeitIstArrayDatum[0]
-										AbfartZeitIstArrayZeitUnix = new Date(AbfartZeitIstArrayDatum).getTime() + AbfartZeitIstArrayZeit[0] * 60 * 60 * 1000 + AbfartZeitIstArrayZeit[1] * 60 * 1000 + AbfartZeitIstArrayZeit[2] * 1000 + 60 * 60 * 1000
-										console.log(AbfartZeitIstArrayZeitUnix)
-										
-										Abfarten[i].Verspätung = (AbfartZeitIstArrayZeitUnix - AbfartZeitSollArrayZeitUnix)/1000
-										
-										console.log("Verspätung: " + Abfarten[i].Verspätung)
-										
-											Message = Message + "(" + Abfarten[i].Linienname + ") Direction: " +  Abfarten[i].Richtungstext + "\n Gleis: " + Abfarten[i].Haltepunkt + " Produkt: " + Abfarten[i].Produkt + "\nVerspätung: " + Abfarten[i].Verspätung + "s"
-											if(Abfarten[i].Prognose){
+								var Message = "Next " + data.limit + " departures at station '" + Haltestellen[0].Haltestellenname + "':\nOrt: " + Haltestellen[0].Ort + "\n\n";
+									vag.Abfarten(data).then(function(Abfahrten) {
+										//console.log(Abfahrten);
+									
+										Abfahrten.map((Abfahrten) =>{
+											Message = Message + "(" + Abfahrten.Linienname + ") Direction: " +  Abfahrten.Richtungstext + "\n Gleis: " + Abfahrten.Haltepunkt + " Produkt: " + Abfahrten.Produkt + "\n Abfart: " + Abfahrten.AbfahrtZeitSoll + " (+" + Abfahrten.Verspätung + "s" + ") "
+											if(Abfahrten.Prognose){
 												Message = Message + " (Echtzeit)\n\n"
 											}else{
 												Message = Message + " (Prognose)\n\n"
 											}
-										}
+										});
 										bot.sendMessage(msg.chat.id, Message, { parseMode: 'markdown', webPreview: false });
 										
 									});
@@ -245,10 +215,11 @@ bot.on('location', (location) => {
 				var Data = {
 					lat: location.location.latitude,
 					lon: location.location.longitude,
-					distance: rows.distance, //Get From DB for User
+					distance: rows.distance, //Get From DB for User (number in meters)
 					sort: rows.sort, //or Alphabetically
-					mode: 'count', //Static used to auto call Abfarten for eatch element. Currently not implemented
-					para: 3, //Get From DB for USER used to auto call Abfarten for eatch element. Currently not implemented
+					mode: 'count', //Static used to auto call Abfarten for eatch element. Currently not implemented (count/other API Methods)
+					para: rows.listlenth, //Get From DB for USER used to auto call Abfarten for eatch element. Currently not implemented (number)
+					list: rows.listmode, //Used to either get only closest station or a list of all stations in the radius (closest/list)
 				};
 				//console.log(rows);
 				vag.OnLocation(Data).then(function(Haltestellen) {
