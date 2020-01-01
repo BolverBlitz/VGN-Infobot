@@ -4,11 +4,25 @@
 
 `npm install`
 
-Enter Telegram Bottoken and MySQL Passwort in secret.json
+Enter Telegram Bottoken and MySQL Passwort, if you want to use Twitter you need to insert your keys and secrets in secret.json and enable twitter in config.json
 ```json
 {
     "dbreaduserpwd":"MySQL Passwort",
-    "bottoken":"Telegram Bottoken"
+    "bottoken":"Telegram Bot Token",
+    "twitter": [
+        {
+            "consumer_key": "Get from Twitter"
+        },
+        {
+            "consumer_secret": "Get from Twitter"
+        },
+        {
+            "access_token_key": "Get from Twitter needs read/write permissions"
+        },
+        {
+            "access_token_secret": "Get from Twitter needs read/write permissions"
+        }
+    ]
 }
 ```
 
@@ -67,7 +81,7 @@ Returns a Promise Object containing
     Longitude: 11.0756094680969,
     Latitude: 49.4468713886159,
     Produkte: 'Bus, U-Bahn',
-    Ort: 'NÃ¼rnberg' }
+    Ort: 'NÃƒÂ¼rnberg' }
 ```
 Onlocation:
 You give this promise a `Object` containing
@@ -90,15 +104,15 @@ This will also give you the same Object like the promise Haltestellen, but with 
     Latitude: 49.4500896153425,
     Produkte: 'Bus, Tram',
     Distance: 8,
-    Ort: 'Nürnberg' },
-  { Haltestellenname: 'Gleißbühlstr. ',
+    Ort: 'NÃ¼rnberg' },
+  { Haltestellenname: 'GleiÃŸbÃ¼hlstr. ',
     VAGKennung: 'GLEISB',
     VGNKennung: 515,
     Longitude: 11.0854366542474,
     Latitude: 49.4501325247482,
     Produkte: 'Bus',
     Distance: 143,
-    Ort: 'Nürnberg' },
+    Ort: 'NÃ¼rnberg' },
   { Haltestellenname: 'Rosa-Luxemburg-Pl. ',
     VAGKennung: 'RO-LUX',
     VGNKennung: 425,
@@ -106,7 +120,7 @@ This will also give you the same Object like the promise Haltestellen, but with 
     Latitude: 49.4516947478956,
     Produkte: 'Bus',
     Distance: 210,
-    Ort: 'Nürnberg' } ]
+    Ort: 'NÃ¼rnberg' } ]
 ```
 
 Error handling:
