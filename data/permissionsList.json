@@ -1,6 +1,7 @@
 {
 	"unregUser":"0",
 	"regUser":"1",
-	"vagMitarbeiter":"2",
+	"regUserPlus":"2",
+	"vagMitarbeiter":"10",
 	"Admin":"40"
 }

@@ -178,6 +178,9 @@ bot.on(/^\/abfarten( .+)*$/i, (msg, props) => {
 								mode: 'limitcount', //Static used to auto call Abfarten for eatch element. Currently not implemented
 								};
 								var Message = "Next " + data.limit + " departures at station '" + Haltestellen[0].Haltestellenname + "':\nOrt: " + Haltestellen[0].Ort + "\n\n";
+								if(Object.entries(Haltestellen).length === 0){	
+									msg.reply.text("I´m sorry, i couldn´t find any stations that contain: " + Para + ".");
+								}else{
 									vag.Abfarten(data).then(function(Abfahrten) {
 										//console.log(Abfahrten);
 									
@@ -192,6 +195,7 @@ bot.on(/^\/abfarten( .+)*$/i, (msg, props) => {
 										bot.sendMessage(msg.chat.id, Message, { parseMode: 'markdown', webPreview: false });
 										
 									});
+								};
 						}else{
 							bot.sendMessage(location.from.id, 'An Error happend...', { parseMode: 'markdown', webPreview: false });
 							bot.sendMessage(config.LogChat, 'An Error happend.\n' + Haltestellen, { parseMode: 'markdown', webPreview: false });
@@ -250,13 +254,14 @@ bot.on('location', (location) => {
 //UserManagment
 bot.on(/^\/register/i, (msg) => {
 	var LastConnectionLost = new Date();
+	bot.deleteMessage(msg.chat.id, msg.message_id);
 	//console.log(msg.from.username);
 	var user = {
 		id: msg.from.id,
 		name: 'Anonym'
 	};
 	perms.permissions(msg.from.id, function(Permissions) {
-		if(Permissions === "0"){
+		if(Permissions === permsJson.unregUser){
 			perms.register(user, function(result) {
 				msg.reply.text("You are now registert!");
 			});
@@ -268,12 +273,13 @@ bot.on(/^\/register/i, (msg) => {
 
 bot.on(/^\/unregister/i, (msg) => {
 	var LastConnectionLost = new Date();
+	bot.deleteMessage(msg.chat.id, msg.message_id);
 	var user = {
 		id: msg.from.id,
 		name: msg.from.username
 	};
 	perms.permissions(msg.from.id, function(Permissions) {
-		if(Permissions >= "1"){
+		if(Permissions >= permsJson.regUser){
 			perms.unregister(user, function(result) {
 				msg.reply.text("I forgot everything about you...\nResult:\nAffectedRows: " + result.affectedRows,);
 			});
@@ -281,6 +287,47 @@ bot.on(/^\/unregister/i, (msg) => {
 			msg.reply.text("You are unkown...");
 		}
 	});
+});
+
+bot.on(/^\/promote( .+)*$/i, (msg, props) => {
+	var LastConnectionLost = new Date();
+	bot.deleteMessage(msg.chat.id, msg.message_id);
+	var Para = props.match[1]
+	if(typeof(Para) === 'undefined'){
+		msg.reply.text("You need to specify a new permissions level");
+	}else{
+		if(!isNaN(Para.trim())){
+	perms.permissions(msg.from.id, function(Permissions) {
+		if(Permissions >= permsJson.Admin){
+			if("reply_to_message" in msg){
+				perms.permissions(msg.reply_to_message.from.id, function(PermissionsReply) {
+					if(PermissionsReply >= permsJson.regUserPlus){
+					if(PermissionsReply <= Para){
+						var user = {
+							id: msg.reply_to_message.from.id,
+							name: msg.reply_to_message.from.username,
+							new: Para,
+							old: PermissionsReply
+						};
+						perms.modify(user);
+					}else{
+						msg.reply.text("The user has more permissions than you try to give him, please use /demote to do that");
+					}
+					}else{
+						msg.reply.text("This is not possible for that user :(")
+					}
+				});
+			}else{
+				msg.reply.text("You need to reply to a user to promote him/her");
+			}
+		}else{
+			msg.reply.text("You don´t have enoth permissions to do this...");
+		}
+	});
+	}else{
+		msg.reply.text("You need to give me the permissions as number from 0-40");
+	}
+	}
 });
 
 //Callback Handling

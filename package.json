@@ -11,11 +11,12 @@
     "new-i18n": "^1.2.0",
     "request": "^2.88.0",
     "systeminformation": "^4.15.3",
-    "telebot": "^1.2.6"
+    "telebot": "^1.2.6",
+    "twitter": "^1.7.1"
   },
   "scripts": {
     "start": "node VAGInfoBot.js",
-	"setup":"node setup.js"
+    "setup": "node setup.js"
   },
   "author": "BolverBlitz",
   "license": "MIT"

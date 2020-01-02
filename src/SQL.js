@@ -16,6 +16,7 @@ module.exports = {
 	requestData: function requestData(userID, callback) { 
 	db.getConnection(function(err, connection){
 		connection.query('SELECT * FROM users where userhash =' + hash(userID) + ';', function(err, rows, fields) {
+			connection.release();
 			//console.log(rows);
 			if(Object.entries(rows).length === 0){
 				callback("0");

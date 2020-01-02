@@ -15,7 +15,7 @@ var db = mysql.createPool({
 });
 //MySQL Syntax
 let sqlcmd = "CREATE DATABASE IF NOT EXISTS " + config.database + ";";
-let sqlcmdtable = "CREATE TABLE IF NOT EXISTS `users` (`userhash` DOUBLE NOT NULL,`userid` DOUBLE NOT NULL, `username` varchar(255), `language` varchar(255), `distance` varchar(255), `listlenth` varchar(255), `listmode` varchar(255), `sort` varchar(255), `permissions` DOUBLE NOT NULL, `keywords` varchar(255), `blocked` DOUBLE NOT NULL, `time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`userid`,`permissions`));";
+let sqlcmdtable = "CREATE TABLE IF NOT EXISTS `users` (`userhash` DOUBLE NOT NULL,`userid` DOUBLE NOT NULL, `username` varchar(255), `language` varchar(255), `distance` varchar(255), `listlenth` varchar(255), `listmode` varchar(255), `sort` varchar(255), `permissions` DOUBLE NOT NULL, `keywords` varchar(255), `blocked` DOUBLE NOT NULL, `time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`userhash`,`permissions`));";
 let sqlcmdaddsuperadmin = "REPLACE INTO users (userhash, userid, username, language, distance,listlenth, listmode, sort, permissions, blocked) VALUES ?";
 let sqlcmdaddsuperadminvalues = [[hash(config.isSuperAdmin), config.isSuperAdmin, config.isSuperAdminUsername, config.DefaultLanguage, config.DefaultDistance, config.DefaultListlenth, config.DefaultListmode, config.DefaultSort, perms.Admin, 0]];
 /*
