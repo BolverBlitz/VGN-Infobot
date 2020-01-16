@@ -13,52 +13,65 @@ var db = mysql.createPool({
 	charset : 'utf8mb4'
 });
 
-module.exports = {
-	permissions: function permissions(userID, callback) {
+let permissions = function(userID) {
+	return new Promise(function(resolve, reject) {
 		db.getConnection(function(err, connection){
 			connection.query('SELECT * FROM users where userhash =' + hash(userID) + ';', function(err, rows, fields) {
 				connection.release();
 				//console.log(rows);
-				console.log('Permissions: ' + typeof(callback))
 				if(Object.entries(rows).length === 0){
-					callback("0");
+					resolve("0");
 				}else{
-					callback(rows[0].permissions);
+					resolve(rows[0].permissions);
 				}
 			});
 		});
-	},
-	register: function register(user, callback) {
+	});
+}
+
+let modify = function(user) {
+	return new Promise(function(resolve, reject) {
+		db.getConnection(function(err, connection){
+			let sqlquery = "UPDATE `users` SET `permissions` = '" + user.new.trim() + "' WHERE (`userhash` = '" + hash(user.id) + "') and (`permissions` = '" + user.old + "')"; //Modify Permissions
+			connection.query(sqlquery, function(err, result) {
+				connection.release();
+				//console.log(sqlquery);
+				resolve(result);
+			});
+		});
+	});
+}
+
+let register = function(user) {
+	return new Promise(function(resolve, reject) {
 		db.getConnection(function(err, connection){
 			let sqlcmdadduser = "REPLACE INTO users (userhash, userid, username, language, distance, listlenth, listmode, sort, permissions, blocked) VALUES ?";
 			let sqlcmdadduserv = [[hash(user.id), 0, user.name, config.DefaultLanguage, config.DefaultDistance, config.DefaultListlenth, config.DefaultListmode, config.DefaultSort, perms.regUser, 0]];
 			connection.query(sqlcmdadduser, [sqlcmdadduserv], function(err, result) {
 				connection.release();
 				//console.log(result);
-				callback(result);
+				resolve(result);
 			});
 		});
-	},
-	unregister: function unregister(user, callback) {
+	});
+}
+
+let unregister = function(user) {
+	return new Promise(function(resolve, reject) {
 		db.getConnection(function(err, connection){
 			let sqlcmddeluser = "DELETE FROM users WHERE (`userhash` = '" + hash(user.id) + "');";
 			connection.query(sqlcmddeluser, function(err, result) {
 				connection.release();
 				//console.log(result);
-				console.log(typeof(callback))
-				callback(result);
+				resolve(result);
 			});
 		});
-	},
-	modify: function modify(user, callback) {
-		db.getConnection(function(err, connection){
-			let sqlquery = "UPDATE `users` SET `permissions` = '" + user.new.trim() + "' WHERE (`userhash` = '" + hash(user.id) + "') and (`permissions` = '" + user.old + "')"; //Modify Permissions
-			connection.query(sqlquery, function(err, result) {
-				connection.release();
-				//console.log(sqlquery);
-				console.log('Modify: ' + typeof(callback))
-				callback(result);
-			});
-		});
-	}
+	});
 }
+
+module.exports = {
+	permissions,
+	modify,
+	register,
+	unregister
+};

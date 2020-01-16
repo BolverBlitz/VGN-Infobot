@@ -18,7 +18,7 @@ var Data = {
     limit: 3, //Get From DB for USER
     };
 
- /*VAG.OnLocation(Data)
+ VAG.OnLocation(Data)
 	.then(
     function(message) {
      console.log(message);
@@ -26,8 +26,8 @@ var Data = {
 	.catch(
 	function(message) {
      console.log("Error" + message);
-    });*/
-
+    });
+/*
 OS.Hardware.then(function(Hardware) {
     let Output = 'Test Tweet:\n';
     Output = Output + '\n- CPU: ' + Hardware.cpubrand + ' ' + Hardware.cpucores + 'x' + Hardware.cpuspeed + ' Ghz';
@@ -38,3 +38,4 @@ OS.Hardware.then(function(Hardware) {
         console.log(Tweet.url)
     })
 });
+*/

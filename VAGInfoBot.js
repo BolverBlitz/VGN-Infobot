@@ -123,11 +123,12 @@ bot.on(/^\/start$/i, (msg) => {
 bot.on(/^\/haltestellen( .+)*$/i, (msg, props) => {
 		var LastConnectionLost = new Date();
 		bot.deleteMessage(msg.chat.id, msg.message_id);
-        var Para = props.match[1]
+		var Para = props.match[1]
 		if(typeof(Para) === 'undefined'){
 			msg.reply.text("You didn´t provided me with a name... I can´t send you all of them :P");
 		}else{
-			perms.permissions(msg.from.id, function(Permissions) {
+			//console.log(Para)
+			perms.permissions(msg.from.id).then(function(Permissions) {
 				if(Permissions >= permsJson.regUser){
 					//console.log(Permissions);
 					vag.Haltestellen(Para).then(function(Haltestellen) {
@@ -141,6 +142,7 @@ bot.on(/^\/haltestellen( .+)*$/i, (msg, props) => {
 									let i1 = +i +1;
 									var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "`\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + Haltestellen[i].Produkte + "\n\n";
 								}
+								//console.log(Message);
 								if(Message.length >= 4000){
 									var Message = 'There are to many Stations that contain ' + Para + '\nFound: ' + Haltestellen.length + ' Stations'
 									bot.sendMessage(msg.chat.id, Message, { parseMode: 'markdown', webPreview: false });
@@ -167,7 +169,7 @@ bot.on(/^\/abfarten( .+)*$/i, (msg, props) => {
 		if(typeof(Para) === 'undefined'){
 			msg.reply.text("You didn´t provided me with a name... I can´t send you all of them :P");
 		}else{
-			perms.permissions(msg.from.id, function(Permissions) {
+			perms.permissions(msg.from.id).then(function(Permissions) {
 				if(Permissions >= permsJson.regUser){
 					//console.log(Permissions);
 					vag.Haltestellen(Para).then(function(Haltestellen) {
@@ -212,7 +214,7 @@ bot.on(/^\/abfarten( .+)*$/i, (msg, props) => {
 
 bot.on('location', (location) => {
 	var LastConnectionLost = new Date();
-		perms.permissions(location.from.id, function(Permissions) {
+		perms.permissions(location.from.id).then(function(Permissions) {
 		if(Permissions >= permsJson.regUser){
 			//console.log(location.from.id)
 			SQL.requestData(location.from.id, function(rows) {
@@ -260,7 +262,7 @@ bot.on(/^\/register/i, (msg) => {
 		id: msg.from.id,
 		name: 'Anonym'
 	};
-	perms.permissions(msg.from.id, function(Permissions) {
+	perms.permissions(msg.from.id).then(function(Permissions) {
 		if(Permissions === permsJson.unregUser){
 			perms.register(user, function(result) {
 				msg.reply.text("You are now registert!");
@@ -278,9 +280,9 @@ bot.on(/^\/unregister/i, (msg) => {
 		id: msg.from.id,
 		name: msg.from.username
 	};
-	perms.permissions(msg.from.id, function(Permissions) {
+	perms.permissions(msg.from.id).then(function(Permissions) {
 		if(Permissions >= permsJson.regUser){
-			perms.unregister(user, function(result) {
+			perms.unregister(user).then(function(result) {
 				msg.reply.text("I forgot everything about you...\nResult:\nAffectedRows: " + result.affectedRows,);
 			});
 		}else{
@@ -297,10 +299,10 @@ bot.on(/^\/promote( .+)*$/i, (msg, props) => {
 		msg.reply.text("You need to specify a new permissions level");
 	}else{
 		if(!isNaN(Para.trim())){
-	perms.permissions(msg.from.id, function(Permissions) {
+	perms.permissions(msg.from.id).then(function(Permissions) {
 		if(Permissions >= permsJson.Admin){
 			if("reply_to_message" in msg){
-				perms.permissions(msg.reply_to_message.from.id, function(PermissionsReply) {
+				perms.permissions(msg.reply_to_message.from.id).then(function(PermissionsReply) {
 					if(PermissionsReply >= permsJson.regUserPlus){
 					if(PermissionsReply <= Para){
 						var user = {
@@ -309,7 +311,9 @@ bot.on(/^\/promote( .+)*$/i, (msg, props) => {
 							new: Para,
 							old: PermissionsReply
 						};
-						perms.modify(user);
+						perms.modify(user).then(function(result) {
+							msg.reply.text("Worked");
+						});
 					}else{
 						msg.reply.text("The user has more permissions than you try to give him, please use /demote to do that");
 					}
