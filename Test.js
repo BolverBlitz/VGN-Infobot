@@ -1,14 +1,14 @@
-var VAG = require('./src/VAGAPIPromise')
-var Twitter = require('./src/Twitter')
+//var VAG = require('./src/VAGAPIPromise')
+//var Twitter = require('./src/Twitter')
 var OS = require('./src/Hardware')
 var f = require('./src/Funktions');
-var Name = 'Moorenbrunn';
+//var Name = 'Moorenbrunn';
 
  /*VAG.Haltestellen(Name).then(
     function(message) {
      console.log(message);
     });*/
-
+/*
 var Data = {
     lat: '49.45015694',
     lon: '11.083455',
@@ -27,15 +27,15 @@ var Data = {
 	function(message) {
      console.log("Error" + message);
     });
-/*
+*/
+
 OS.Hardware.then(function(Hardware) {
     let Output = 'Test Tweet:\n';
     Output = Output + '\n- CPU: ' + Hardware.cpubrand + ' ' + Hardware.cpucores + 'x' + Hardware.cpuspeed + ' Ghz';
     Output = Output + '\n- Load: ' + f.Round2Dec(Hardware.load);
     Output = Output + '%\n- Memory Total: ' + f.Round2Dec(Hardware.memorytotal/1073741824) + ' GB'
     Output = Output + '\n- Memory Free: ' + f.Round2Dec(Hardware.memoryfree/1073741824) + ' GB'
-    Twitter.Tweet(Output).then(function(Tweet){
-        console.log(Tweet.url)
-    })
+    //Twitter.Tweet(Output).then(function(Tweet){
+    //console.log(Tweet.url)
+    //})
 });
-*/
