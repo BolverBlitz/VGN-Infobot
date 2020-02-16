@@ -1,8 +1,8 @@
 //Include simple modules
 var fs = require("fs");
-const util = require('util');
-const mysql = require('mysql'); 
-const hash = require('hash-int');
+const util = require("util");
+const mysql = require("mysql"); 
+const hash = require("hash-int");
 
 //Für Zeit Befehle
 var Sekunde = 1000;

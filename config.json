@@ -9,7 +9,7 @@
 	"LogChat":"-1001211106939",
 	"isSuperAdmin":"206921999",
 	"isSuperAdminUsername":"BolverBlitz",
-	"dbreaduserhost":"example.com",
+	"dbreaduserhost":"localhost",
 	"dbreaduser":"root",
 	"database":"VAGInfo",
 	"WTdelmsgshort":"5400",

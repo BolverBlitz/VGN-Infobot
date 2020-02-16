@@ -1,8 +1,8 @@
-var config = require('../config');
-var mysql = require('mysql');
-var hash = require('hash-int');
-var secret = require('../secret');
-var perms = require('../data/permissionsList');
+var config = require("../config");
+var mysql = require("mysql");
+var hash = require("hash-int");
+var secret = require("../secret");
+var perms = require("../data/permissionsList");
 
 var db = mysql.createPool({
 	connectionLimit : 100,

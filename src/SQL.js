@@ -1,7 +1,7 @@
-var config = require('../config');
-var mysql = require('mysql');
-const hash = require('hash-int');
-var secret = require('../secret');
+var config = require("../config");
+var mysql = require("mysql");
+const hash = require("hash-int");
+var secret = require("../secret");
 
 var db = mysql.createPool({
 	connectionLimit : 100,
@@ -12,18 +12,39 @@ var db = mysql.createPool({
 	charset : 'utf8mb4'
 });
 
-module.exports = {
-	requestData: function requestData(userID, callback) { 
-	db.getConnection(function(err, connection){
-		connection.query('SELECT * FROM users where userhash =' + hash(userID) + ';', function(err, rows, fields) {
-			connection.release();
-			//console.log(rows);
-			if(Object.entries(rows).length === 0){
-				callback("0");
-			}else{
-			callback(rows[0]);
-			}
+let requestData = function(userID) {
+	return new Promise(function(resolve, reject) {
+		db.getConnection(function(err, connection){
+			connection.query('SELECT * FROM users where userhash =' + hash(userID) + ';', function(err, rows, fields) {
+				connection.release();
+				//console.log(rows);
+				if(Object.entries(rows).length === 0){
+					resolve("0");
+				}else{
+					resolve(rows[0]);
+				}
+			});
 		});
 	});
-	}
 }
+
+let listall = function() {
+	return new Promise(function(resolve, reject) {
+		db.getConnection(function(err, connection){
+			connection.query('SELECT * FROM vaginfo.users;', function(err, rows, fields) {
+				connection.release();
+				//console.log(rows);
+				if(Object.entries(rows).length === 0){
+					resolve("0");
+				}else{
+					resolve(rows);
+				}
+			});
+		});
+	});
+}
+
+module.exports = {
+	requestData,
+	listall
+};
