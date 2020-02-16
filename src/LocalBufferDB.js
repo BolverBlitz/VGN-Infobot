@@ -1,9 +1,9 @@
-const VAGDE = 'https://start.vag.de/dm/api';
-const request = require('request');
+const VAGDE = "https://start.vag.de/dm/api";
+const request = require("request");
 
-var config = require('../config');
-var mysql = require('mysql');
-var secret = require('../secret');
+var config = require("../config");
+var mysql = require("mysql");
+var secret = require("../secret");
 
 var db = mysql.createPool({
 	connectionLimit : 100,
@@ -11,7 +11,7 @@ var db = mysql.createPool({
 	user: config.dbreaduser,
 	password: secret.dbreaduserpwd,
 	database: config.database,
-	charset : 'utf8mb4'
+	charset : "utf8mb4"
 });
 
 let updateDB = function() {
@@ -21,19 +21,17 @@ let updateDB = function() {
 			if (err) { return console.log(err); }
 			let sqlcmdadduser = "REPLACE INTO Haltestellen (Haltestellenname, VAGKennung, VGNKennung, Longitude, Latitude, Produkte) VALUES ?";
 			db.getConnection(function(err, connection){
-				for(i in body.Haltestellen){
-					//console.log(body.Haltestellen[i].Haltestellenname)
+				for(let i in body.Haltestellen){
 					let sqlcmdadduserv = [[body.Haltestellen[i].Haltestellenname, body.Haltestellen[i].VAGKennung, body.Haltestellen[i].VGNKennung, body.Haltestellen[i].Longitude, body.Haltestellen[i].Latitude, body.Haltestellen[i].Produkte]];
 					connection.query(sqlcmdadduser, [sqlcmdadduserv], function(err, result) {
-						if (err) throw err;
-						console.log(sqlcmdadduser + " " + sqlcmdadduserv)
+						if (err) { throw err; }
 					});
-				}
-				resolve("Done")
-			})
+				};
+				resolve("Done");
+			});
 		});
 	});
-}
+};
 
 
 module.exports = {
