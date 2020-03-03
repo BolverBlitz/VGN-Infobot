@@ -14,6 +14,9 @@ const perms = require("./src/Permissions");
 //permissions(TG UserID) Returns a var with the Permissions Level
 const SQL = require("./src/SQL");
 //requestData(TG UserID) Returns a Object with all lines of the first row
+const LocalDB = require("./src/LocalBufferDB");
+//UpdateDB() Will refresh all Stations the VAG API Provides
+//lookup(Object) .lookup is the string to look for .mode is the think you search for (Haltestellenname, VGNKennung, etc)
 const OS = require("./src/Hardware")
 //Hardware() returns a Objectwith CPU and RAM
 
@@ -180,7 +183,7 @@ bot.on(/^\/abfarten( .+)*$/i, (msg, props) => {
 									msg.reply.text("I´m sorry, i couldn´t find any stations that contain: " + Para + ".");
 								}else{
 									vag.Abfarten(data).then(function(Abfahrten) {
-										console.log(Abfahrten);
+										console.log(Haltestellen[0].VGNKennung);
 									
 										Abfahrten.map((Abfahrten) =>{
 											Message = Message + "(" + Abfahrten.Linienname + ") Direction: " +  Abfahrten.Richtungstext + "\n Gleis: " + Abfahrten.Haltepunkt + " Produkt: " + Abfahrten.Produkt + "\n Abfart: " + Abfahrten.AbfahrtZeitSoll + " (+" + Abfahrten.Verspätung + "s" + ") "
@@ -437,36 +440,53 @@ bot.on('callbackQuery', (msg) => {
         	).catch(error => console.log('Error:', error));
 		}
 	}
-	if(data[0] === 'Update')
+
+	if(data[0] === 'Update') //Update Abfahrten abfrage
 	{
-		var data = {
-			limit: 5,
-			vgnkennung: Haltestellen[0].VGNKennung,
-			mode: 'limitcount', //Static used to auto call Abfarten for eatch element. Currently not implemented
+		var para = {
+			lookup: data[1],
+			mode: "VGNKennung"
 			};
-			var Message = "Next " + data.limit + " departures at station '" + Haltestellen[0].Haltestellenname + "':\nOrt: " + Haltestellen[0].Ort + "\n\n";
+
+		LocalDB.lookup(para).then(function(Haltestellen) {
 			if(Object.entries(Haltestellen).length === 0){	
-				msg.reply.text("I´m sorry, i couldn´t find any stations that contain: " + Para + ".");
-			}else{
-				vag.Abfarten(data).then(function(Abfahrten) {
-					//console.log(Abfahrten);
-				
-					Abfahrten.map((Abfahrten) =>{
-						Message = Message + "(" + Abfahrten.Linienname + ") Direction: " +  Abfahrten.Richtungstext + "\n Gleis: " + Abfahrten.Haltepunkt + " Produkt: " + Abfahrten.Produkt + "\n Abfart: " + Abfahrten.AbfahrtZeitSoll + " (+" + Abfahrten.Verspätung + "s" + ") "
-						if(Abfahrten.Prognose){
-							Message = Message + " (Echtzeit)\n\n"
-						}else{
-							Message = Message + " (Prognose)\n\n"
-						}
-					});
-					let replyMarkup = bot.inlineKeyboard([
-						[
-							bot.inlineButton('Refresh', {callback: 'Update_' + data.vgnkennung})
-						]
-					]);
-					bot.sendMessage(msg.chat.id, Message, { parseMode: 'markdown', webPreview: false , replyMarkup});
+				bot.sendMessage(chatId, "I´m sorry, i couldn´t find " + para.lookup + " in my local Buffer, i´ll update it. Please wait ...", { parseMode: 'markdown', webPreview: false});
+				LocalDB.updateDB().then(function(Output) {
+					bot.sendMessage(chatId, "I´ve updated my local Buffer, please try again now.\n" + Output.Text +  "\nChecked: " + Output.count + " Stations!", { parseMode: 'markdown', webPreview: false});
+					bot.sendMessage(config.LogChat, msg.from.username + " requestet a station that didn´t existed in my LocalBufferDB, it got updatet!")
 				});
-			};
+			}else{
+			var data = {
+				limit: 5,
+				vgnkennung: Haltestellen[0].VGNKennung,
+				mode: 'limitcount', //Static used to auto call Abfarten for eatch element. Currently not implemented
+				};
+				var Message = "Next " + data.limit + " departures at station '" + Haltestellen[0].Haltestellenname + "':\nOrt: " + Haltestellen[0].Ort + "\n\n";
+					vag.Abfarten(data).then(function(Abfahrten) {
+						//console.log(Abfahrten);
+					
+						Abfahrten.map((Abfahrten) =>{
+							Message = Message + "(" + Abfahrten.Linienname + ") Direction: " +  Abfahrten.Richtungstext + "\n Gleis: " + Abfahrten.Haltepunkt + " Produkt: " + Abfahrten.Produkt + "\n Abfart: " + Abfahrten.AbfahrtZeitSoll + " (+" + Abfahrten.Verspätung + "s" + ") "
+							if(Abfahrten.Prognose){
+								Message = Message + " (Echtzeit)\n\n"
+							}else{
+								Message = Message + " (Prognose)\n\n"
+							}
+						});
+						let replyMarkup = bot.inlineKeyboard([
+							[
+								bot.inlineButton('Refresh', {callback: 'Update_' + data.vgnkennung})
+							]
+						]);
+						//bot.sendMessage(chatId, Message, { parseMode: 'markdown', webPreview: false , replyMarkup});
+						bot.editMessageText(
+							{chatId: chatId, messageId: messageId}, Message,
+							{parseMode: 'markdown', replyMarkup}
+						).catch(error => console.log('Error:', error));
+						
+					});
+			}
+		});
 	}
 });
 

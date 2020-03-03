@@ -16,24 +16,55 @@ var db = mysql.createPool({
 
 let updateDB = function() {
 	return new Promise(function(resolve, reject) {
-		var url = VAGDE + '/haltestellen.json/vag?name=';
+		var url = VAGDE + "/haltestellen.json/vag?name=";
+		let sqlcmdadduser = "REPLACE INTO Haltestellen (Haltestellenname, Ort, VAGKennung, VGNKennung, Longitude, Latitude, Produkte) VALUES ?";
 		request(url, { json: true }, (err, res, body) => {
-			if (err) { return console.log(err); }
-			let sqlcmdadduser = "REPLACE INTO Haltestellen (Haltestellenname, VAGKennung, VGNKennung, Longitude, Latitude, Produkte) VALUES ?";
+			if (err) { throw err; }
 			db.getConnection(function(err, connection){
-				for(let i in body.Haltestellen){
-					let sqlcmdadduserv = [[body.Haltestellen[i].Haltestellenname, body.Haltestellen[i].VAGKennung, body.Haltestellen[i].VGNKennung, body.Haltestellen[i].Longitude, body.Haltestellen[i].Latitude, body.Haltestellen[i].Produkte]];
-					connection.query(sqlcmdadduser, [sqlcmdadduserv], function(err, result) {
-						if (err) { throw err; }
+				let out = {
+					Text: "Updated finished!",
+					count: 0
+					};
+					//console.log(body.Haltestellen)
+					body.Haltestellen.map((Haltestellen) => {
+						out.count = out.count + 1;
+						let HaltestellennameSplit = Haltestellen.Haltestellenname.split("(");
+						let Name = HaltestellennameSplit[0];
+						Haltestellen.Haltestellenname = Name.trim();
+						let Ort = HaltestellennameSplit[1].replace(/[)]/g,"",);
+						Haltestellen.Ort = Ort;
+
+						Haltestellen.Produkte = Haltestellen.Produkte.replace(/ubahn/i,"U-Bahn",);
+						Haltestellen.Produkte = Haltestellen.Produkte.replace(/,/g,", ",);
+
+						let sqlcmdadduserv = [[Haltestellen.Haltestellenname, Haltestellen.Ort, Haltestellen.VAGKennung, Haltestellen.VGNKennung, Haltestellen.Longitude, Haltestellen.Latitude, Haltestellen.Produkte]];
+						connection.query(sqlcmdadduser, [sqlcmdadduserv], function(err, result) {
+							if (err) { throw err; }
+						});
 					});
-				};
-				resolve("Done");
+					connection.release();
+					resolve(out);
 			});
 		});
 	});
 };
 
+let lookup = function(para) {
+	return new Promise(function(resolve, reject) {
+		if(para.mode === "Haltestellenname"){var sqlcmd = "SELECT Haltestellenname,VGNKennung,Ort FROM Haltestellen where Haltestellenname LIKE '%" + para.lookup.trim() + "%'";}
+		if(para.mode === "VGNKennung"){var sqlcmd = "SELECT Haltestellenname,VGNKennung,Ort FROM Haltestellen where VGNKennung LIKE '%" + para.lookup.trim() + "%'";}
+		
+		db.getConnection(function(err, connection){
+			connection.query(sqlcmd, function(err, rows){
+				if (err) { throw err; }
+				resolve(rows);
+			});
+		});
+	});
+}
+
 
 module.exports = {
-	updateDB
+	updateDB,
+	lookup
 };
