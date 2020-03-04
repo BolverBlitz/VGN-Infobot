@@ -140,7 +140,7 @@ bot.on(/^\/haltestellen( .+)*$/i, (msg, props) => {
 								//console.log(Haltestellen);
 								for(var i in Haltestellen){
 									let i1 = +i +1;
-									var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "`\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + Haltestellen[i].Produkte + "\n\n";
+									var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "`\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + replaceProdukteWithEmotes(Haltestellen[i].Produkte) + "\n\n";
 								}
 								//console.log(Message);
 								if(Message.length >= 4000){
@@ -186,7 +186,7 @@ bot.on(/^\/abfarten( .+)*$/i, (msg, props) => {
 										console.log(Haltestellen[0].VGNKennung);
 									
 										Abfahrten.map((Abfahrten) =>{
-											Message = Message + "(" + Abfahrten.Linienname + ") Direction: " +  Abfahrten.Richtungstext + "\n Gleis: " + Abfahrten.Haltepunkt + " Produkt: " + Abfahrten.Produkt + "\n Abfart: " + Abfahrten.AbfahrtZeitSoll + " (+" + Abfahrten.Verspätung + "s" + ") "
+											Message = Message + "(" + Abfahrten.Linienname + ") Direction: " +  Abfahrten.Richtungstext + "\n Gleis: " + Abfahrten.Haltepunkt + " Produkt: " + replaceProdukteWithEmotes(Abfahrten.Produkt) + "\n Abfart: " + Abfahrten.AbfahrtZeitSoll + " (+" + Abfahrten.Verspätung + "s" + ") "
 											if(Abfahrten.Prognose){
 												Message = Message + " (Echtzeit)\n\n"
 											}else{
@@ -238,7 +238,7 @@ bot.on('location', (location) => {
 						}else{
 							for(let i in Haltestellen){
 								let i1 = +i +1;
-								var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "` (" + Haltestellen[i].Distance + "m)" + "\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + Haltestellen[i].Produkte + "\n\n";
+								var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "` (" + Haltestellen[i].Distance + "m)" + "\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + replaceProdukteWithEmotes(Haltestellen[i].Produkte) + "\n\n";
 							};
 						}
 					bot.sendMessage(location.from.id, Message, { parseMode: 'markdown', webPreview: false });
@@ -445,7 +445,8 @@ bot.on('callbackQuery', (msg) => {
 	{
 		var para = {
 			lookup: data[1],
-			mode: "VGNKennung"
+			mode: "VGNKennung",
+			limit: 1
 			};
 
 		LocalDB.lookup(para).then(function(Haltestellen) {
@@ -490,7 +491,65 @@ bot.on('callbackQuery', (msg) => {
 	}
 });
 
+bot.on('inlineQuery', msg => {
+
+    let query = msg.query;
+	const answers = bot.answerList(msg.id, {cacheTime: 1});
+	
+	var para = {
+		lookup: query,
+		mode: "Haltestellenname",
+		limit: 10
+		};
+
+	LocalDB.lookup(para).then(function(Haltestellen) {
+		let idcount = 0;
+		if(Object.entries(Haltestellen).length === 0){
+			answers.addArticle({
+				id: 'Not found',
+				title: 'No station found',
+				description: query,
+				message_text: ("I´m sorry, i couln´t find any stations containing " + query)
+			});
+			return bot.answerQuery(answers);
+		}else{
+			Haltestellen.map((Haltestellen) => {
+				//let outText = "Name: " + Haltestellen.Haltestellenname;
+				//outText += Haltestellen.Produkte
+				//outText += Haltestellen.Haltestellenname + "\n"
+				//outText += Haltestellen.Ort
+
+				let replyMarkup = bot.inlineKeyboard([
+					[
+						bot.inlineButton('Depatures', {callback: 'Update_' + Haltestellen.vgnkennung})
+					]
+				]);
+				answers.addArticle({
+					id: idcount,
+					title: Haltestellen.Haltestellenname,
+					description: Haltestellen.Ort + " " + replaceProdukteWithEmotes(Haltestellen.Produkte),
+					parseMode: 'markdown',
+					message_text: ("`Test`")
+				});
+				idcount++;
+			});
+			return bot.answerQuery(answers);
+		}
+	});
+});
+
 //Funktions
+
+function replaceProdukteWithEmotes(string){
+	var Input = string.split(",");
+	let Output = "";
+	Input.map((In) => {
+		if(In.trim() === "Bus"){Output += "🚌 "};
+		if(In.trim() === "Tram"){Output += "🚃 "};
+		if(In.trim() === "U-Bahn"){Output += "🚇 "};
+	});
+	return(Output);
+}
 
 /*function test(){
 var Data = {
