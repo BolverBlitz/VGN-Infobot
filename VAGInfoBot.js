@@ -105,7 +105,7 @@ bot.on(/^\/start$/i, (msg) => {
 	{
 		if(msg.text.split(' ')[0].endsWith(botname))
 		{
-		let startmsg = "Test";
+		let startmsg = "Privat";
 		msg.reply.text(startmsg).then(function(msg)
 	                        {
 	                                setTimeout(function(){
@@ -115,7 +115,7 @@ bot.on(/^\/start$/i, (msg) => {
 		bot.deleteMessage(msg.chat.id, msg.message_id);
 		}
 	}else{
-		let startmsg = "Test";
+		let startmsg = "Gruppe";
 		msg.reply.text(startmsg);
 		bot.deleteMessage(msg.chat.id, msg.message_id);
 	}
@@ -372,9 +372,9 @@ bot.on(/^\/settings/i, (msg) => {
 		if(Permissions >= permsJson.regUser){
 			let replyMarkup = bot.inlineKeyboard([
 				[
-					bot.inlineButton('User', {callback: 'Settings_User'})
+					bot.inlineButton('User', {callback: 'Settings_' + msg.from.id + '_User'})
 				], [
-					bot.inlineButton('On Location', {callback: 'Settings_OnLoc'})
+					bot.inlineButton('On Location', {callback: 'Settings_' + msg.from.id + '_OnLoc'})
 				]
 			]);
 			msg.reply.text("Here you can customize your experiens\nSettings: ", {parseMode: 'markdown', replyMarkup});
@@ -384,108 +384,150 @@ bot.on(/^\/settings/i, (msg) => {
 
 //Callback Handling
 bot.on('callbackQuery', (msg) => {
-	bot.answerCallbackQuery(msg.id);
+	/*bot.answerCallbackQuery(msg.id,{
+		text: "Test",
+		showAlert: true
+	});*/
 	
-	var chatId = msg.message.chat.id;
-	var messageId = msg.message.message_id;
+	//console.log(msg)
+	if ('inline_message_id' in msg) {
+	//if(Object.entries(msg.inline_message_id).length === 1){	
+		var inlineId = msg.inline_message_id;
+	}else{
+		var chatId = msg.message.chat.id;
+		var messageId = msg.message.message_id;
+	}
+
 	var data = msg.data.split("_")
 	//console.log(msg)
 	
 	if(data[0] === 'Settings')
 	{
-		if(data[1] === 'Start')
-   		{
-			let replyMarkup = bot.inlineKeyboard([
+		if(data[1] = msg.from.id){
+			if(data[2] === 'Start')
+			{
+				bot.answerCallbackQuery(msg.id);
+				let replyMarkup = bot.inlineKeyboard([
+						[
+							bot.inlineButton('User', {callback: 'Settings_' + msg.from.id + '_User'})
+						], [
+							bot.inlineButton('On Location', {callback: 'Settings_' + msg.from.id + '_OnLoc'})
+						]
+				]);
+				bot.editMessageText(
+					{chatId: chatId, messageId: messageId}, `Settings:`,
+					{parseMode: 'markdown', replyMarkup}
+				).catch(error => console.log('Error:', error));
+			}
+
+			if(data[2] === 'User')
+			{
+				bot.answerCallbackQuery(msg.id);
+				let replyMarkup = bot.inlineKeyboard([
 					[
-						bot.inlineButton('User', {callback: 'Settings_User'})
+						bot.inlineButton('Update TelegramID', {callback: 'op_' + msg.from.id + '_userid'}),
+						bot.inlineButton('Language', {callback: 'op_' + msg.from.id + '_language'})
 					], [
-						bot.inlineButton('On Location', {callback: 'Settings_OnLoc'})
+						bot.inlineButton('back', {callback: 'Settings_' + msg.from.id + '_Start'})
 					]
-			]);
-			bot.editMessageText(
-				{chatId: chatId, messageId: messageId}, `Settings:`,
-				{parseMode: 'markdown', replyMarkup}
-        	).catch(error => console.log('Error:', error));
-		}
+				]);
+				bot.editMessageText(
+					{chatId: chatId, messageId: messageId}, `User Settings:`,
+					{parseMode: 'markdown', replyMarkup}
+				).catch(error => console.log('Error:', error));
+			}
 
-		if(data[1] === 'User')
-   		{
-			let replyMarkup = bot.inlineKeyboard([
-				[
-					bot.inlineButton('Update TelegramID', {callback: 'op_userid'}),
-					bot.inlineButton('Language', {callback: 'op_language'})
-				], [
-					bot.inlineButton('back', {callback: 'Settings_Start'})
-				]
-			]);
-			bot.editMessageText(
-				{chatId: chatId, messageId: messageId}, `User Settings:`,
-				{parseMode: 'markdown', replyMarkup}
-        	).catch(error => console.log('Error:', error));
-		}
-
-		if(data[1] === 'OnLoc')
-   		{
-			let replyMarkup = bot.inlineKeyboard([
-				[
-					bot.inlineButton('Set GPS Distance', {callback: 'op_nothing'}),
-					bot.inlineButton('m', {callback: 'op_switch_distance'})
-				], [
-					bot.inlineButton('back', {callback: 'Settings_Start'})
-				]
-			]);
-			bot.editMessageText(
-				{chatId: chatId, messageId: messageId}, `On Location Settings`,
-				{parseMode: 'markdown', replyMarkup}
-        	).catch(error => console.log('Error:', error));
+			if(data[2] === 'OnLoc')
+			{
+				bot.answerCallbackQuery(msg.id);
+				let replyMarkup = bot.inlineKeyboard([
+					[
+						bot.inlineButton('Set GPS Distance', {callback: 'op_' + msg.from.id + '_nothing'}),
+						bot.inlineButton('m', {callback: 'op_' + msg.from.id + '_switch_distance'})
+					], [
+						bot.inlineButton('back', {callback: 'Settings_' + msg.from.id + '_Start'})
+					]
+				]);
+				bot.editMessageText(
+					{chatId: chatId, messageId: messageId}, `On Location Settings`,
+					{parseMode: 'markdown', replyMarkup}
+				).catch(error => console.log('Error:', error));
+			}
+		}else{
+			bot.answerCallbackQuery(msg.id,{
+				text: "Du darfst hier nicht drücken!",
+				showAlert: true
+			});
 		}
 	}
 
 	if(data[0] === 'Update') //Update Abfahrten abfrage
 	{
-		var para = {
-			lookup: data[1],
-			mode: "VGNKennung",
-			limit: 1
-			};
+		perms.permissions(msg.from.id).then(function(Permissions) {
+			if(Permissions >= permsJson.regUser){
 
-		LocalDB.lookup(para).then(function(Haltestellen) {
-			if(Object.entries(Haltestellen).length === 0){	
-				bot.sendMessage(chatId, "I´m sorry, i couldn´t find " + para.lookup + " in my local Buffer, i´ll update it. Please wait ...", { parseMode: 'markdown', webPreview: false});
-				LocalDB.updateDB().then(function(Output) {
-					bot.sendMessage(chatId, "I´ve updated my local Buffer, please try again now.\n" + Output.Text +  "\nChecked: " + Output.count + " Stations!", { parseMode: 'markdown', webPreview: false});
-					bot.sendMessage(config.LogChat, msg.from.username + " requestet a station that didn´t existed in my LocalBufferDB, it got updatet!")
+				bot.answerCallbackQuery(msg.id,{
+					text: "Abfarten wurden aktualisiert...",
+					showAlert: false
+				});
+
+				var para = {
+					lookup: data[1],
+					mode: "VGNKennung",
+					limit: 1
+					};
+
+				LocalDB.lookup(para).then(function(Haltestellen) {
+					if(Object.entries(Haltestellen).length === 0){	
+						bot.sendMessage(chatId, "I´m sorry, i couldn´t find " + para.lookup + " in my local Buffer, i´ll update it. Please wait ...", { parseMode: 'markdown', webPreview: false});
+						LocalDB.updateDB().then(function(Output) {
+							bot.sendMessage(chatId, "I´ve updated my local Buffer, please try again now.\n" + Output.Text +  "\nChecked: " + Output.count + " Stations!", { parseMode: 'markdown', webPreview: false});
+							bot.sendMessage(config.LogChat, msg.from.username + " requestet a station that didn´t existed in my LocalBufferDB, it got updatet!")
+						});
+					}else{
+					var data = {
+						limit: 5,
+						vgnkennung: Haltestellen[0].VGNKennung,
+						mode: 'limitcount', //Static used to auto call Abfarten for eatch element. Currently not implemented
+						};
+						var Message = "Next " + data.limit + " departures at station '" + Haltestellen[0].Haltestellenname + "':\nOrt: " + Haltestellen[0].Ort + "\n\n";
+							vag.Abfarten(data).then(function(Abfahrten) {
+								//console.log(Abfahrten);
+							
+								Abfahrten.map((Abfahrten) =>{
+									Message = Message + "(" + Abfahrten.Linienname + ") Direction: " +  Abfahrten.Richtungstext + "\n Gleis: " + Abfahrten.Haltepunkt + " Produkt: " + replaceProdukteWithEmotes(Abfahrten.Produkt) + "\n Abfart: " + Abfahrten.AbfahrtZeitSoll + " (+" + Abfahrten.Verspätung + "s" + ") "
+										Message = Message + " (Echtzeit)\n\n"
+									}else{
+										Message = Message + " (Prognose)\n\n"
+									}
+								});
+								let replyMarkup = bot.inlineKeyboard([
+									[
+										bot.inlineButton('Refresh', {callback: 'Update_' + data.vgnkennung})
+									]
+								]);
+
+								//console.log(Message)
+								if ('inline_message_id' in msg) {
+									bot.editMessageText(
+										{inlineMsgId: inlineId}, Message,
+										{parseMode: 'markdown', replyMarkup}
+									).catch(error => console.log('Error:', error));
+								}else{
+									bot.editMessageText(
+										{chatId: chatId, messageId: messageId}, Message,
+										{parseMode: 'markdown', replyMarkup}
+									).catch(error => console.log('Error:', error));
+								}
+								
+							});
+					}
 				});
 			}else{
-			var data = {
-				limit: 5,
-				vgnkennung: Haltestellen[0].VGNKennung,
-				mode: 'limitcount', //Static used to auto call Abfarten for eatch element. Currently not implemented
-				};
-				var Message = "Next " + data.limit + " departures at station '" + Haltestellen[0].Haltestellenname + "':\nOrt: " + Haltestellen[0].Ort + "\n\n";
-					vag.Abfarten(data).then(function(Abfahrten) {
-						//console.log(Abfahrten);
-					
-						Abfahrten.map((Abfahrten) =>{
-							Message = Message + "(" + Abfahrten.Linienname + ") Direction: " +  Abfahrten.Richtungstext + "\n Gleis: " + Abfahrten.Haltepunkt + " Produkt: " + Abfahrten.Produkt + "\n Abfart: " + Abfahrten.AbfahrtZeitSoll + " (+" + Abfahrten.Verspätung + "s" + ") "
-							if(Abfahrten.Prognose){
-								Message = Message + " (Echtzeit)\n\n"
-							}else{
-								Message = Message + " (Prognose)\n\n"
-							}
-						});
-						let replyMarkup = bot.inlineKeyboard([
-							[
-								bot.inlineButton('Refresh', {callback: 'Update_' + data.vgnkennung})
-							]
-						]);
-						//bot.sendMessage(chatId, Message, { parseMode: 'markdown', webPreview: false , replyMarkup});
-						bot.editMessageText(
-							{chatId: chatId, messageId: messageId}, Message,
-							{parseMode: 'markdown', replyMarkup}
-						).catch(error => console.log('Error:', error));
-						
-					});
+				bot.answerCallbackQuery(msg.id,{
+					text: "Diese Funktion ist nur für regestrierte nutzer.",
+					showAlert: true
+				});
 			}
 		});
 	}
@@ -521,15 +563,20 @@ bot.on('inlineQuery', msg => {
 
 				let replyMarkup = bot.inlineKeyboard([
 					[
-						bot.inlineButton('Depatures', {callback: 'Update_' + Haltestellen.vgnkennung})
+						bot.inlineButton('Depatures', {callback: 'Update_' + Haltestellen.VGNKennung})
 					]
 				]);
+
+				let MessageOut = "`" + Haltestellen.Haltestellenname + "`\n - Ort: " + Haltestellen.Ort + "\n - Verkehrsmittel: " + replaceProdukteWithEmotes(Haltestellen.Produkte) + "\n";
+
 				answers.addArticle({
 					id: idcount,
 					title: Haltestellen.Haltestellenname,
 					description: Haltestellen.Ort + " " + replaceProdukteWithEmotes(Haltestellen.Produkte),
-					parseMode: 'markdown',
-					message_text: ("`Test`")
+					reply_markup: replyMarkup,
+					message_text: MessageOut,
+					//message_text: "Test",
+					parse_mode: 'markdown'
 				});
 				idcount++;
 			});
@@ -546,7 +593,7 @@ function replaceProdukteWithEmotes(string){
 	Input.map((In) => {
 		if(In.trim() === "Bus"){Output += "🚌 "};
 		if(In.trim() === "Tram"){Output += "🚃 "};
-		if(In.trim() === "U-Bahn"){Output += "🚇 "};
+		if(In.trim() === "UBahn"){Output += "🚇 "};
 	});
 	return(Output);
 }

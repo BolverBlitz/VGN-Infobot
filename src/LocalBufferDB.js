@@ -34,8 +34,8 @@ let updateDB = function() {
 						let Ort = HaltestellennameSplit[1].replace(/[)]/g,"",);
 						Haltestellen.Ort = Ort;
 
-						Haltestellen.Produkte = Haltestellen.Produkte.replace(/ubahn/i,"U-Bahn",);
-						Haltestellen.Produkte = Haltestellen.Produkte.replace(/,/g,", ",);
+						//Haltestellen.Produkte = Haltestellen.Produkte.replace(/ubahn/i,"U-Bahn",);
+						//Haltestellen.Produkte = Haltestellen.Produkte.replace(/,/g,", ",);
 
 						let sqlcmdadduserv = [[Haltestellen.Haltestellenname, Haltestellen.Ort, Haltestellen.VAGKennung, Haltestellen.VGNKennung, Haltestellen.Longitude, Haltestellen.Latitude, Haltestellen.Produkte]];
 						connection.query(sqlcmdadduser, [sqlcmdadduserv], function(err, result) {
@@ -52,11 +52,12 @@ let updateDB = function() {
 let lookup = function(para) {
 	return new Promise(function(resolve, reject) {
 		if(para.mode === "Haltestellenname"){var sqlcmd = "SELECT Haltestellenname,VGNKennung,Ort,Produkte FROM Haltestellen where Haltestellenname LIKE '%" + para.lookup.trim() + "%' LIMIT " + para.limit;}
-		if(para.mode === "VGNKennung"){var sqlcmd = "SELECT Haltestellenname,VGNKennung,Ort FROM Haltestellen where VGNKennung LIKE '%" + para.lookup.trim() + "%' LIMIT" + para.limit;}
+		if(para.mode === "VGNKennung"){var sqlcmd = "SELECT Haltestellenname,VGNKennung,Ort FROM Haltestellen where VGNKennung LIKE '%" + para.lookup.trim() + "%' LIMIT " + para.limit;}
 		
 		db.getConnection(function(err, connection){
 			connection.query(sqlcmd, function(err, rows){
 				if (err) { throw err; }
+				connection.release();
 				resolve(rows);
 			});
 		});

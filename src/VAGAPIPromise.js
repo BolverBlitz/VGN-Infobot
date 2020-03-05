@@ -61,8 +61,8 @@ let OnLocation = function(data) {
 				Haltestellen.Haltestellenname = Name.trim();
 				let Ort = HaltestellennameSplit[1].replace(/[)]/g,"",);
 				Haltestellen.Ort = Ort;
-				Haltestellen.Produkte = Haltestellen.Produkte.replace(/ubahn/i,"U-Bahn",);
-				Haltestellen.Produkte = Haltestellen.Produkte.replace(/,/g,", ",);
+				//Haltestellen.Produkte = Haltestellen.Produkte.replace(/ubahn/i,"U-Bahn",);
+				//Haltestellen.Produkte = Haltestellen.Produkte.replace(/,/g,", ",);
 			});
 		if(data.sort === "Distance"){body.Haltestellen.sort((a, b) => (a.Distance > b.Distance) ? 1 : -1)};
 		if(data.sort === "Alphabetically"){body.Haltestellen.sort((a, b) => (a.Haltestellenname > b.Haltestellenname) ? 1 : -1)};
