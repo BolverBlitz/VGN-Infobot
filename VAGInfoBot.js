@@ -496,6 +496,7 @@ bot.on('callbackQuery', (msg) => {
 							
 								Abfahrten.map((Abfahrten) =>{
 									Message = Message + "(" + Abfahrten.Linienname + ") Direction: " +  Abfahrten.Richtungstext + "\n Gleis: " + Abfahrten.Haltepunkt + " Produkt: " + replaceProdukteWithEmotes(Abfahrten.Produkt) + "\n Abfart: " + Abfahrten.AbfahrtZeitSoll + " (+" + Abfahrten.Verspätung + "s" + ") "
+									if(Abfahrten.Prognose){
 										Message = Message + " (Echtzeit)\n\n"
 									}else{
 										Message = Message + " (Prognose)\n\n"
