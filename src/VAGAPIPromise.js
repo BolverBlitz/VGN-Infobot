@@ -86,6 +86,9 @@ let Abfarten = function(data) {
 			return err; 
 			//reject(err);
 			}
+
+			//if(Object.entries(body.Abfahrten).length === 0){
+
 			//console.log(body)
 			body.Abfahrten.map((Abfahrten) =>{
 				AbfahrtZeitSollArray = Abfahrten.AbfahrtszeitSoll;

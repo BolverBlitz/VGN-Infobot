@@ -229,7 +229,7 @@ bot.on('location', (location) => {
 					para: rows.listlenth, //Get From DB for USER used to auto call Abfarten for eatch element. Currently not implemented (number)
 					list: rows.listmode, //Used to either get only closest station or a list of all stations in the radius (closest/list)
 				};
-				console.log(rows);
+				//console.log(location);
 				vag.OnLocation(Data).then(function(Haltestellen) {
 					if(Haltestellen != 'ENOTFOUND' && Haltestellen != 'ECONNREFUSED' && Haltestellen != 'ETIMEDOUT' && Haltestellen != 'ECONNRESET') {
 						var Message = "Stations in radius " + rows.distance + "m :\n\n";
@@ -241,9 +241,9 @@ bot.on('location', (location) => {
 								var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "` (" + Haltestellen[i].Distance + "m)" + "\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + replaceProdukteWithEmotes(Haltestellen[i].Produkte) + "\n\n";
 							};
 						}
-					bot.sendMessage(location.from.id, Message, { parseMode: 'markdown', webPreview: false });
+					bot.sendMessage(location.chat.id, Message, { parseMode: 'markdown', webPreview: false });
 					}else{
-						bot.sendMessage(location.from.id, 'An Error happend...', { parseMode: 'markdown', webPreview: false });
+						bot.sendMessage(location.chat.id, 'An Error happend...', { parseMode: 'markdown', webPreview: false });
 						bot.sendMessage(config.LogChat, 'An Error happend.\n' + Haltestellen, { parseMode: 'markdown', webPreview: false });
 					}
 				});
@@ -264,7 +264,7 @@ bot.on(/^\/register/i, (msg) => {
 	};
 	perms.permissions(msg.from.id).then(function(Permissions) {
 		if(Permissions === permsJson.unregUser){
-			perms.register(user, function(result) {
+			perms.register(user).then(function(result) {
 				msg.reply.text("You are now registert!");
 			});
 		}else{
@@ -377,8 +377,10 @@ bot.on(/^\/settings/i, (msg) => {
 					bot.inlineButton('On Location', {callback: 'Settings_' + msg.from.id + '_OnLoc'})
 				]
 			]);
-			msg.reply.text("Here you can customize your experiens\nSettings: ", {parseMode: 'markdown', replyMarkup});
-		};
+			msg.reply.text("Here you can customize your experiens\nSettings for " + msg.from.first_name + ":", {parseMode: 'markdown', replyMarkup});
+		}else{
+			msg.reply.text("Your need to be registert to do that.")
+		}
 	});
 });
 
@@ -389,7 +391,7 @@ bot.on('callbackQuery', (msg) => {
 		showAlert: true
 	});*/
 	
-	//console.log(msg)
+	console.log(msg.data)
 	if ('inline_message_id' in msg) {
 	//if(Object.entries(msg.inline_message_id).length === 1){	
 		var inlineId = msg.inline_message_id;
@@ -403,62 +405,229 @@ bot.on('callbackQuery', (msg) => {
 	
 	if(data[0] === 'Settings')
 	{
-		if(data[1] = msg.from.id){
-			if(data[2] === 'Start')
-			{
-				bot.answerCallbackQuery(msg.id);
-				let replyMarkup = bot.inlineKeyboard([
+		SQL.requestData(msg.from.id).then(function(user) {
+
+			if(parseInt(data[1]) === msg.from.id){
+
+				if(data[2] === 'Start')
+				{
+					bot.answerCallbackQuery(msg.id);
+					let replyMarkup = bot.inlineKeyboard([
+							[
+								bot.inlineButton('User', {callback: 'Settings_' + data[1] + '_User'})
+							], [
+								bot.inlineButton('On Location', {callback: 'Settings_' + data[1] + '_OnLoc'})
+							]
+					]);
+					bot.editMessageText(
+						{chatId: chatId, messageId: messageId}, "Settings for " + msg.from.first_name + ":",
+						{parseMode: 'markdown', replyMarkup}
+					).catch(error => console.log('Error:', error));
+				}
+
+				if(data[2] === 'User')
+				{
+					bot.answerCallbackQuery(msg.id);
+					if(user.userid === 0){
+						let replyMarkup = bot.inlineKeyboard([ //If TG ID is set, chance to remove TelegramID
+							[
+								bot.inlineButton('Update TelegramID', {callback: 'op_' + data[1] + '_userid'}),
+								bot.inlineButton('Language ' + user.language, {callback: 'op_' + data[1] + '_language'})
+							], [
+								bot.inlineButton('back', {callback: 'Settings_' + data[1] + '_Start'})
+							]
+						]);
+
+						bot.editMessageText(
+							{chatId: chatId, messageId: messageId}, "User Settings for " + msg.from.first_name + ":\nPlease click on the buttos to change the value the buttons respont to.",
+							{parseMode: 'markdown', replyMarkup}
+						).catch(error => console.log('Error:', error));
+					}else{
+						let replyMarkup = bot.inlineKeyboard([ //If TG ID is set, chance to remove TelegramID
+							[
+								bot.inlineButton('Delete TelegramID', {callback: 'op_' + data[1] + '_deluserid'}),
+								bot.inlineButton('Language ' + user.language, {callback: 'op_' + data[1] + '_language'})
+							], [
+								bot.inlineButton('back', {callback: 'Settings_' + data[1] + '_Start'})
+							]
+						]);
+
+						bot.editMessageText(
+							{chatId: chatId, messageId: messageId}, "User Settings for " + msg.from.first_name + ":",
+							{parseMode: 'markdown', replyMarkup}
+						).catch(error => console.log('Error:', error));
+					}
+				}
+
+				if(data[2] === 'OnLoc')
+				{
+					bot.answerCallbackQuery(msg.id);
+					let replyMarkup = bot.inlineKeyboard([
 						[
-							bot.inlineButton('User', {callback: 'Settings_' + msg.from.id + '_User'})
+							bot.inlineButton('Set GPS Distance', {callback: 'op_' + data[1] + '_nothing'}),
+							bot.inlineButton('m', {callback: 'op_' + data[1] + '_switch_distance'})
 						], [
-							bot.inlineButton('On Location', {callback: 'Settings_' + msg.from.id + '_OnLoc'})
+							bot.inlineButton('back', {callback: 'Settings_' + data[1] + '_Start'})
 						]
-				]);
-				bot.editMessageText(
-					{chatId: chatId, messageId: messageId}, `Settings:`,
-					{parseMode: 'markdown', replyMarkup}
-				).catch(error => console.log('Error:', error));
+					]);
+					bot.editMessageText(
+						{chatId: chatId, messageId: messageId}, "On Location Settings for " + msg.from.first_name + ":",
+						{parseMode: 'markdown', replyMarkup}
+					).catch(error => console.log('Error:', error));
+				}
+			}else{
+				bot.answerCallbackQuery(msg.id,{
+					text: "Du darfst hier nicht drücken!",
+					showAlert: true
+				});
 			}
+		});
+	}
 
-			if(data[2] === 'User')
-			{
-				bot.answerCallbackQuery(msg.id);
-				let replyMarkup = bot.inlineKeyboard([
-					[
-						bot.inlineButton('Update TelegramID', {callback: 'op_' + msg.from.id + '_userid'}),
-						bot.inlineButton('Language', {callback: 'op_' + msg.from.id + '_language'})
-					], [
-						bot.inlineButton('back', {callback: 'Settings_' + msg.from.id + '_Start'})
-					]
-				]);
-				bot.editMessageText(
-					{chatId: chatId, messageId: messageId}, `User Settings:`,
-					{parseMode: 'markdown', replyMarkup}
-				).catch(error => console.log('Error:', error));
-			}
+	if(data[0] === 'op')
+	{
+		SQL.requestData(msg.from.id).then(function(user) {
+			if(parseInt(data[1]) === msg.from.id){
+				if(data[2] === 'userid')
+				{
+					let para = {
+						id: msg.from.id,
+						collum: 'userid',
+						valuenew: msg.from.id,
+						valueold: '0',
+					}
+					SQL.updateUser(para).then(function(response) {
+						var userUpdate = {
+							id: msg.from.id,
+							name: msg.from.username,
+							new: "2",
+							old: "1"
+						};
+						perms.toLeveltwo(userUpdate).then(function(result) {
+							bot.answerCallbackQuery(msg.id,{
+								text: "Deine TelegramID: " + msg.from.id + " wrude gespeichert.\n Du bist nun Level 2",
+								showAlert: true
+							});
+							let replyMarkup = bot.inlineKeyboard([ //If TG ID is set, chance to remove TelegramID
+								[
+									bot.inlineButton('Delete TelegramID', {callback: 'op_' + data[1] + '_deluserid'}),
+									bot.inlineButton('Language ' + user.language, {callback: 'op_' + data[1] + '_language'})
+								], [
+									bot.inlineButton('back', {callback: 'Settings_' + data[1] + '_Start'})
+								]
+							]);
+							bot.editMessageText(
+								{chatId: chatId, messageId: messageId}, "User Settings for " + msg.from.first_name + ":",
+								{parseMode: 'markdown', replyMarkup}
+							).catch(error => console.log('Error:', error));
 
-			if(data[2] === 'OnLoc')
-			{
-				bot.answerCallbackQuery(msg.id);
-				let replyMarkup = bot.inlineKeyboard([
-					[
-						bot.inlineButton('Set GPS Distance', {callback: 'op_' + msg.from.id + '_nothing'}),
-						bot.inlineButton('m', {callback: 'op_' + msg.from.id + '_switch_distance'})
-					], [
-						bot.inlineButton('back', {callback: 'Settings_' + msg.from.id + '_Start'})
-					]
-				]);
-				bot.editMessageText(
-					{chatId: chatId, messageId: messageId}, `On Location Settings`,
-					{parseMode: 'markdown', replyMarkup}
-				).catch(error => console.log('Error:', error));
+						}).catch(error => console.log('Error:', error));
+					}).catch(function(error) {
+						console.log(error)
+						bot.answerCallbackQuery(msg.id,{
+							text: "Du hast deine ID bereits gespeichert.",
+							showAlert: true
+						});
+					})
+				}
+				if(data[2] === 'deluserid')
+				{
+					let para = {
+						id: msg.from.id,
+						collum: 'userid',
+						valuenew: '0',
+						valueold: msg.from.id,
+					}
+					SQL.updateUser(para).then(function(response) {
+						var userUpdate = {
+							id: msg.from.id,
+							name: "Anonym",
+							new: "1",
+							old: "2"
+						};
+						perms.toLeveltwo(userUpdate).then(function(result) {
+							bot.answerCallbackQuery(msg.id,{
+								text: "Deine TelegramID: " + msg.from.id + " wrude gelöscht.\n Du bist nun Level 1",
+								showAlert: true
+							});
+							let replyMarkup = bot.inlineKeyboard([ //If TG ID is set, chance to remove TelegramID
+								[
+									bot.inlineButton('Update TelegramID', {callback: 'op_' + data[1] + '_userid'}),
+									bot.inlineButton('Language ' + user.language, {callback: 'op_' + data[1] + '_language'})
+								], [
+									bot.inlineButton('back', {callback: 'Settings_' + data[1] + '_Start'})
+								]
+							]);
+							bot.editMessageText(
+								{chatId: chatId, messageId: messageId}, "User Settings for " + msg.from.first_name + ":",
+								{parseMode: 'markdown', replyMarkup}
+							).catch(error => console.log('Error:', error));
+							
+						}).catch(error => console.log('Error:', error));
+					}).catch(function(error) {
+						console.log(error)
+						bot.answerCallbackQuery(msg.id,{
+							text: "Du hast deine ID bereits gelöscht.",
+							showAlert: true
+						});
+					})
+				}
+
+				if(data[2] === 'language')
+				{
+						let lang = i18n.languages
+						let position = lang.indexOf(user.language.toLowerCase())
+						let positionOLD = position
+						position = position + 1;
+						if(position > lang.length-1){position = 0}
+
+						let para = {
+							id: msg.from.id,
+							collum: 'language',
+							valuenew: lang[position].toUpperCase(),
+							valueold: lang[positionOLD].toUpperCase(),
+						}
+						SQL.updateUser(para).then(function(response) {
+							if(user.userid === 0){
+								let replyMarkup = bot.inlineKeyboard([ //If TG ID is set, chance to Update TelegramID
+									[
+										bot.inlineButton('Update TelegramID', {callback: 'op_' + data[1] + '_userid'}),
+										bot.inlineButton('Language ' + lang[position].toUpperCase(), {callback: 'op_' + data[1] + '_language'})
+									], [
+										bot.inlineButton('back', {callback: 'Settings_' + data[1] + '_Start'})
+									]
+								]);
+		
+								bot.editMessageText(
+									{chatId: chatId, messageId: messageId}, "User Settings for " + msg.from.first_name + ":\nPlease click on the buttos to change the value the buttons respont to.",
+									{parseMode: 'markdown', replyMarkup}
+								).catch(error => console.log('Error:', error));
+								bot.answerCallbackQuery(msg.id);
+							}else{
+								let replyMarkup = bot.inlineKeyboard([ //If TG ID is set, chance to remove TelegramID
+									[
+										bot.inlineButton('Delete TelegramID', {callback: 'op_' + data[1] + '_deluserid'}),
+										bot.inlineButton('Language ' + lang[position].toUpperCase(), {callback: 'op_' + data[1] + '_language'})
+									], [
+										bot.inlineButton('back', {callback: 'Settings_' + data[1] + '_Start'})
+									]
+								]);
+		
+								bot.editMessageText(
+									{chatId: chatId, messageId: messageId}, "User Settings for " + msg.from.first_name + ":",
+									{parseMode: 'markdown', replyMarkup}
+								).catch(error => console.log('Error:', error));
+								bot.answerCallbackQuery(msg.id);
+							}
+						});
+				}
+			}else{
+				bot.answerCallbackQuery(msg.id,{
+					text: "Du darfst hier nicht drücken!",
+					showAlert: true
+				});
 			}
-		}else{
-			bot.answerCallbackQuery(msg.id,{
-				text: "Du darfst hier nicht drücken!",
-				showAlert: true
-			});
-		}
+		});
 	}
 
 	if(data[0] === 'Update') //Update Abfahrten abfrage
@@ -473,7 +642,8 @@ bot.on('callbackQuery', (msg) => {
 
 				var para = {
 					lookup: data[1],
-					mode: "VGNKennung",
+					collum: "VGNKennung",
+					mode: "EQUEL",
 					limit: 1
 					};
 
@@ -541,7 +711,8 @@ bot.on('inlineQuery', msg => {
 	
 	var para = {
 		lookup: query,
-		mode: "Haltestellenname",
+		collum: "Haltestellenname",
+		mode: "LIKE",
 		limit: 10
 		};
 
@@ -557,14 +728,10 @@ bot.on('inlineQuery', msg => {
 			return bot.answerQuery(answers);
 		}else{
 			Haltestellen.map((Haltestellen) => {
-				//let outText = "Name: " + Haltestellen.Haltestellenname;
-				//outText += Haltestellen.Produkte
-				//outText += Haltestellen.Haltestellenname + "\n"
-				//outText += Haltestellen.Ort
 
 				let replyMarkup = bot.inlineKeyboard([
 					[
-						bot.inlineButton('Depatures', {callback: 'Update_' + Haltestellen.VGNKennung})
+						bot.inlineButton('Depatures', {callback: 'Update_' + Haltestellen.VGNKennung,})
 					]
 				]);
 
@@ -583,7 +750,7 @@ bot.on('inlineQuery', msg => {
 			});
 			return bot.answerQuery(answers);
 		}
-	});
+	}).catch(error => console.log('Error:', error));
 });
 
 //Funktions

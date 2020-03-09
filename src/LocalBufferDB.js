@@ -51,9 +51,9 @@ let updateDB = function() {
 
 let lookup = function(para) {
 	return new Promise(function(resolve, reject) {
-		if(para.mode === "Haltestellenname"){var sqlcmd = "SELECT Haltestellenname,VGNKennung,Ort,Produkte FROM Haltestellen where Haltestellenname LIKE '%" + para.lookup.trim() + "%' LIMIT " + para.limit;}
-		if(para.mode === "VGNKennung"){var sqlcmd = "SELECT Haltestellenname,VGNKennung,Ort FROM Haltestellen where VGNKennung LIKE '%" + para.lookup.trim() + "%' LIMIT " + para.limit;}
-		
+		if(para.mode === "LIKE"){var sqlcmd = "SELECT Haltestellenname,VGNKennung,Ort,Produkte FROM Haltestellen where " + para.collum + " LIKE '%" + para.lookup.trim() + "%' LIMIT " + para.limit;}
+		if(para.mode === "EQUEL"){var sqlcmd = "SELECT Haltestellenname,VGNKennung,Ort FROM Haltestellen where " + para.collum + " ='" + para.lookup.trim() + "' LIMIT " + para.limit;}
+		console.log(sqlcmd)
 		db.getConnection(function(err, connection){
 			connection.query(sqlcmd, function(err, rows){
 				if (err) { throw err; }

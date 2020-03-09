@@ -44,7 +44,28 @@ let listall = function() {
 	});
 }
 
+let updateUser = function(para) {
+	return new Promise(function(resolve, reject) {
+		db.getConnection(function(err, connection){
+			let sqlquery = "UPDATE `users` SET `" + para.collum + "` = '" + para.valuenew + "' WHERE (`userhash` = '" + hash(para.id) + "') and (`" + para.collum + "` = '" + para.valueold + "')"; //Modify User Parameter
+			connection.query(sqlquery, function(err, rows, fields) {
+				if (err) { throw err; }
+				connection.release();
+				//console.log(rows);
+				if(rows.changedRows >= 1){
+					console.log("UpdateUser: Done " + para.id + " Collum: " + para.collum + " New: " + para.valuenew + " Old: " + para.valueold)
+					resolve("done");
+				}else{
+					console.log("UpdateUser: Fail " + para.id + " Collum: " + para.collum + " New: " + para.valuenew + " Old: " + para.valueold)
+					reject("fail")
+				}
+			});
+		});
+	});
+}
+
 module.exports = {
 	requestData,
-	listall
+	listall,
+	updateUser
 };

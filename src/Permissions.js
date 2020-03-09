@@ -42,6 +42,19 @@ let modify = function(user) {
 	});
 }
 
+let toLeveltwo = function(user) {
+	return new Promise(function(resolve, reject) {
+		db.getConnection(function(err, connection){
+			let sqlquery = "UPDATE `users` SET `permissions` = '" + user.new + "', `username` = '" + user.name + "' WHERE (`userhash` = '" + hash(user.id) + "') and (`permissions` = '" + user.old + "')";
+			connection.query(sqlquery, function(err, result) {
+				connection.release();
+				//console.log(sqlquery);
+				resolve(result);
+			});
+		});
+	});
+}
+
 let register = function(user) {
 	return new Promise(function(resolve, reject) {
 		db.getConnection(function(err, connection){
@@ -73,5 +86,6 @@ module.exports = {
 	permissions,
 	modify,
 	register,
-	unregister
+	unregister,
+	toLeveltwo
 };
