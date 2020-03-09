@@ -54,8 +54,18 @@ Wait for `Completed. You can now start the Bot (npm start)`
 `npm start`
 Console should log "Pushed bot start to the admin", you should see a message from the bot in the chat LogChat.
 
+
+### Add language
+To add a language please send me the language.json file via Telegram or do a pull request.
+If you do a pull request, don´t forget to add your language in the import of i18n. 
+Please name the .json the same as you write into the line below.
+```js
+const i18n = newI18n(__dirname + "/languages", ["en", "de", "Your language"]);
+```
+The bot will automatically circle through all languages in the usersettings after restart.
+
 ### VAG API for nodeJS
-If you just want to use the API for your own project go into scr/VAGAPIPromise.js
+If you just want to use the API for your own project go into src/VAGAPIPromise.js
 > A working example is [Test.js](https://github.com/BolverBlitz/VGN-Infobot/blob/master/Test.js)
 
 Usage:
