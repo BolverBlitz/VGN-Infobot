@@ -14,6 +14,16 @@ var db = mysql.createPool({
 	charset : "utf8mb4"
 });
 
+function cleanString(input) {
+    var output = "";
+    for (var i=0; i<input.length; i++) {
+        if (input.charCodeAt(i) <= 127) {
+            output += input.charAt(i);
+        }
+    }
+    return output;
+}
+
 let updateDB = function() {
 	return new Promise(function(resolve, reject) {
 		var url = VAGDE + "/haltestellen.json/vag?name=";
@@ -51,7 +61,7 @@ let updateDB = function() {
 
 let lookup = function(para) {
 	return new Promise(function(resolve, reject) {
-		if(para.mode === "LIKE"){var sqlcmd = "SELECT Haltestellenname,VGNKennung,Ort,Produkte FROM Haltestellen where " + para.collum + " LIKE '%" + para.lookup.trim() + "%' LIMIT " + para.limit;}
+		if(para.mode === "LIKE"){var sqlcmd = "SELECT Haltestellenname,VGNKennung,Ort,Produkte FROM Haltestellen where " + para.collum + " LIKE '%" + cleanString(para.lookup.trim()) + "%' LIMIT " + para.limit;}
 		if(para.mode === "EQUEL"){var sqlcmd = "SELECT Haltestellenname,VGNKennung,Ort FROM Haltestellen where " + para.collum + " ='" + para.lookup.trim() + "' LIMIT " + para.limit;}
 		console.log(sqlcmd)
 		db.getConnection(function(err, connection){
