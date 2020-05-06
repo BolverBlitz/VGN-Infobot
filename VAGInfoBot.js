@@ -101,8 +101,10 @@ bot.on(/^\/botinfo$/i, (msg) => {
 
 bot.on(/^\/start$/i, (msg) => {
 	bot.deleteMessage(msg.chat.id, msg.message_id);
+	console.log(msg)
 	if(msg.chat.type != "private")
 	{
+		
 		if(msg.text.split(' ')[0].endsWith(botname))
 		{
 		let startmsg = "Privat";
@@ -115,7 +117,7 @@ bot.on(/^\/start$/i, (msg) => {
 		bot.deleteMessage(msg.chat.id, msg.message_id);
 		}
 	}else{
-		let startmsg = "Gruppe";
+		let startmsg = "Privat";
 		msg.reply.text(startmsg);
 		bot.deleteMessage(msg.chat.id, msg.message_id);
 	}
@@ -385,6 +387,7 @@ bot.on(/^\/settings/i, (msg) => {
 });
 
 //Callback Handling
+//Pattern is "Menü_USERID_Wert"
 bot.on('callbackQuery', (msg) => {
 	/*bot.answerCallbackQuery(msg.id,{
 		text: "Test",
@@ -392,7 +395,7 @@ bot.on('callbackQuery', (msg) => {
 	});*/
 	
 	console.log(msg.data)
-	if ('inline_message_id' in msg) {
+	if ('inline_message_id' in msg){
 	//if(Object.entries(msg.inline_message_id).length === 1){	
 		var inlineId = msg.inline_message_id;
 	}else{
@@ -401,7 +404,7 @@ bot.on('callbackQuery', (msg) => {
 	}
 
 	var data = msg.data.split("_")
-	//console.log(msg)
+	console.log(msg.data)
 	
 	if(data[0] === 'Settings')
 	{
