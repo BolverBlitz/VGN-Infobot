@@ -10,6 +10,7 @@
     "mysql": "^2.16.0",
     "new-i18n": "^1.2.0",
     "request": "^2.88.0",
+    "spamwatch": "^0.2.0",
     "systeminformation": "^4.15.3",
     "telebot": "^1.2.6",
     "twitter": "^1.7.1"

@@ -3,6 +3,8 @@ var Twitter = require("./src/Twitter");
 var OS = require("./src/Hardware");
 var f = require("./src/Funktions");
 var LocalDB = require("./src/LocalBufferDB");
+const SpamWatch = require('spamwatch');
+const client = new SpamWatch.Client("Token");
 var Name = 'Moorenbrunn';
 
  /*VAG.Haltestellen(Name).then(
@@ -40,8 +42,13 @@ OS.Hardware.then(function(Hardware) {
     })
 });
 */
-
+/*
 LocalDB.updateDB().then(function(result){
     console.log(result);
 })
+*/
+(async () => {
+    const ban = await client.getBan(206921999);
+    console.log(ban);
+})();
 

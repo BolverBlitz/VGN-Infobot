@@ -19,6 +19,8 @@ const LocalDB = require("./src/LocalBufferDB");
 //lookup(Object) .lookup is the string to look for .mode is the think you search for (Haltestellenname, VGNKennung, etc)
 const OS = require("./src/Hardware")
 //Hardware() returns a Objectwith CPU and RAM
+const SpamWatch = require("./src/Spamwatch")
+//checkUser(TGID)
 
 //Include simple modules
 var fs = require("fs");
@@ -35,7 +37,6 @@ const bot = new Telebot({
 	limit: 1000,
         usePlugins: ['commandButton']
 });
-
 
 //Database
 var db = mysql.createPool({
@@ -68,7 +69,7 @@ OS.Hardware.then(function(Hardware) {
 	Output = Output + '\n- Load: ' + f.Round2Dec(Hardware.load);
 	Output = Output + '%\n- Memory Total: ' + f.Round2Dec(Hardware.memorytotal/1073741824) + ' GB'
 	Output = Output + '\n- Memory Free: ' + f.Round2Dec(Hardware.memoryfree/1073741824) + ' GB'
-	bot.sendMessage(config.LogChat, Output)
+	//bot.sendMessage(config.LogChat, Output)
 	//console.log(Hardware);
 });
 f.log("Pushed bot start to the admin");
@@ -97,6 +98,49 @@ bot.on(/^\/botinfo$/i, (msg) => {
                      }, config.WTdelmsglong);
              });
              bot.deleteMessage(msg.chat.id, msg.message_id);
+});
+
+bot.on(/^\/check$/i, (msg) => {
+	bot.deleteMessage(msg.chat.id, msg.message_id);
+	if ('reply_to_message' in msg) {
+		var UserID = msg.reply_to_message.from.id
+	}else{
+		var UserID = msg.from.id
+	}
+	SpamWatch.checkUser(UserID).then(function(ban) {
+		if ('reply_to_message' in msg) {
+			if(ban === true){
+				msg.reply.text(`${msg.reply_to_message.from.username} is banned in Spamwatch`)
+			}else{
+				msg.reply.text(`${msg.reply_to_message.from.username} is not banned in Spamwatch`)
+			}
+		}else{
+			if(ban === true){
+				msg.reply.text(`${msg.from.username} is banned in Spamwatch`)
+			}else{
+				msg.reply.text(`${msg.from.username} is not banned in Spamwatch`)
+			}
+		}
+	}).catch(error => console.log('Error (/check):', error.description))
+});
+
+bot.on(/^\/checkdb$/i, (msg) => {
+	var Message = "SpamWatch status of users in DB:\n\n"
+	var promises = [];
+	SQL.listall().then(function(list) {
+		list.sort((a, b) => (a.permissions < b.permissions) ? 1 : -1);
+		//console.log(list)
+		for(i in list){
+			if(list[i].permissions >= '2'){
+				promises.push(SpamWatch.checkUser(list[i]))
+			}
+		}
+		Promise.all(promises)
+        .then((result) => {
+			result.map(User => Message = Message + "(" + User.permissions + ") " + User.username + "(" + User.userid + ") Banned: " + User.ban + "\n")
+			msg.reply.text(Message);
+      	});
+	});
 });
 
 bot.on(/^\/start$/i, (msg) => {
