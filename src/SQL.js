@@ -31,9 +31,9 @@ let requestData = function(userID) {
 let listall = function() {
 	return new Promise(function(resolve, reject) {
 		db.getConnection(function(err, connection){
-			connection.query('SELECT * FROM vaginfo.users;', function(err, rows, fields) {
+			connection.query('SELECT * FROM users;', function(err, rows, fields) {
 				connection.release();
-				//console.log(rows);
+				console.log(rows, err);
 				if(Object.entries(rows).length === 0){
 					resolve("0");
 				}else{
