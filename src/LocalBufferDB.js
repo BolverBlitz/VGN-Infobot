@@ -15,10 +15,12 @@ var db = mysql.createPool({
 });
 
 function cleanString(input) {
-    var output = "";
+	var output = "";
     for (var i=0; i<input.length; i++) {
-        if (input.charCodeAt(i) <= 127) {
-            output += input.charAt(i);
+        if(input.charCodeAt(i) <= 127 || input.charCodeAt(i) === 223 || input.charCodeAt(i) === 252 || input.charCodeAt(i) === 228 || input.charCodeAt(i) === 246 || input.charCodeAt(i) === 196 || input.charCodeAt(i) === 214 || input.charCodeAt(i) === 220) {
+			if(input.charCodeAt(i) != 39){
+				output += input.charAt(i);
+			}
         }
     }
     return output;
