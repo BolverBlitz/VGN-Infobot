@@ -280,14 +280,14 @@ bot.on('location', (location) => {
 					if(Haltestellen != 'ENOTFOUND' && Haltestellen != 'ECONNREFUSED' && Haltestellen != 'ETIMEDOUT' && Haltestellen != 'ECONNRESET') {
 						var Message = "Stations in radius " + rows.distance + "m :\n\n";
 						if(Object.entries(Haltestellen).length === 0){
-							bot.sendMessage(location.from.id, "I´m sorry, i couldn´t find any stations in your area.\nDistance: " + Data.distance);
+							bot.sendMessage(location.chat.id, "I´m sorry, i couldn´t find any stations in your area.\nDistance: " + Data.distance);
 						}else{
 							for(let i in Haltestellen){
 								let i1 = +i +1;
 								var Message = Message + "(" + i1 +") `" + Haltestellen[i].Haltestellenname + "` (" + Haltestellen[i].Distance + "m)" + "\n - Ort: " + Haltestellen[i].Ort + "\n - Verkehrsmittel: " + replaceProdukteWithEmotes(Haltestellen[i].Produkte) + "\n\n";
 							};
+							bot.sendMessage(location.chat.id, Message, { parseMode: 'markdown', webPreview: false });
 						}
-					bot.sendMessage(location.chat.id, Message, { parseMode: 'markdown', webPreview: false });
 					}else{
 						bot.sendMessage(location.chat.id, 'An Error happend...', { parseMode: 'markdown', webPreview: false });
 						bot.sendMessage(config.LogChat, 'An Error happend.\n' + Haltestellen, { parseMode: 'markdown', webPreview: false });

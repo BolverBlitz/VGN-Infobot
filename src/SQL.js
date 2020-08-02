@@ -33,7 +33,7 @@ let listall = function() {
 		db.getConnection(function(err, connection){
 			connection.query('SELECT * FROM users;', function(err, rows, fields) {
 				connection.release();
-				console.log(rows, err);
+				//console.log(rows, err);
 				if(Object.entries(rows).length === 0){
 					resolve("0");
 				}else{
