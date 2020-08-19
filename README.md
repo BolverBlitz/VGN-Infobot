@@ -26,9 +26,9 @@ Enter Telegram Bottoken and MySQL Passwort, if you want to use Twitter you need 
 }
 ```
 
-`dbreaduserhost` is the IP of the MySQLServer, you can use localhost if it runs localy.
-`dbreaduser` enter MySQL User that has accses to create and modyfiy a DB.
-`database` enter Database Name.
+`dbreaduserhost` is the IP of the MySQLServer, you can use localhost if it runs localy.  
+`dbreaduser` enter MySQL User that has accses to create and modyfiy a DB.  
+`database` enter Database Name.  
 ```json
 {
 	"botname":"VGN_Infobot",
@@ -56,16 +56,16 @@ Console should log "Pushed bot start to the admin", you should see a message fro
 
 
 ### Add language
-To add a language please send me the language.json file via Telegram or do a pull request.
-If you do a pull request, don´t forget to add your language in the import of i18n. 
-Please name the .json the same as you write into the line below.
+To add a language please send me the language.json file via Telegram or do a pull request.  
+If you do a pull request, don´t forget to add your language in the import of i18n.   
+Please name the .json the same as you write into the line below.  
 ```js
 const i18n = newI18n(__dirname + "/languages", ["en", "de", "Your language"]);
 ```
 The bot will automatically circle through all languages in the usersettings after restart.
 
 ### VAG API for nodeJS
-If you just want to use the API for your own project go into src/VAGAPIPromise.js
+If you just want to use the API for your own project go into src/VAGAPIPromise.js  
 > A working example is [Test.js](https://github.com/BolverBlitz/VGN-Infobot/blob/master/Test.js)
 
 Usage:
