@@ -11,7 +11,7 @@
     "new-i18n": "^1.2.0",
     "request": "^2.88.0",
     "spamwatch": "^0.2.0",
-    "systeminformation": "^4.27.11",
+    "systeminformation": "^4.30.5",
     "telebot": "^1.2.6",
     "twitter": "^1.7.1"
   },
