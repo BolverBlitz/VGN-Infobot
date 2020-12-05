@@ -100,30 +100,6 @@ bot.on(/^\/botinfo$/i, (msg) => {
              bot.deleteMessage(msg.chat.id, msg.message_id);
 });
 
-bot.on(/^\/check$/i, (msg) => {
-	bot.deleteMessage(msg.chat.id, msg.message_id);
-	if ('reply_to_message' in msg) {
-		var UserID = msg.reply_to_message.from.id
-	}else{
-		var UserID = msg.from.id
-	}
-	SpamWatch.checkUser(UserID).then(function(ban) {
-		if ('reply_to_message' in msg) {
-			if(ban === true){
-				msg.reply.text(`${msg.reply_to_message.from.username} is banned in Spamwatch`)
-			}else{
-				msg.reply.text(`${msg.reply_to_message.from.username} is not banned in Spamwatch`)
-			}
-		}else{
-			if(ban === true){
-				msg.reply.text(`${msg.from.username} is banned in Spamwatch`)
-			}else{
-				msg.reply.text(`${msg.from.username} is not banned in Spamwatch`)
-			}
-		}
-	}).catch(error => console.log('Error (/check):', error.description))
-});
-
 bot.on(/^\/checkdb$/i, (msg) => {
 	var Message = "SpamWatch status of users in DB:\n\n"
 	var promises = [];
